@@ -22,33 +22,32 @@ my @Conf =(
 "1900800 50 10", #dats: 22
 "2073600 50 10" #dats: 24
 );
-
-foreach my $configuration (@Conf)
+	foreach my $configuration (@Conf)
 {
 	my @configuration2 = split ' ', $configuration;
+	my $time = $configuration2[0];
+	my $population =  $configuration2[1];
+	my $executions = $configuration2[2];
+
+	print "$time $population $executions\n";
+	for(my $Sed = 1; $Sed <= $executions; $Sed++) ##Realizar 35 ejecuciones con distintas semilla de cada instancia..
+	{
+	      my $command = "cat ../Results/report_".$time."_".$population."_".$executions."_".$Sed.".output | ./evaluator-tsp";
+	      print `$command`."\n";
+	}
+}
+	print "\nPenalizations\n";
+foreach my $configuration1 (@Conf)
+{
+	my @configuration2 = split ' ', $configuration1;
 	my $time = $configuration2[0];
 	my $population = $configuration2[1];
 	my $executions = $configuration2[2];
 	print "$time $population $executions\n";
+
 	for(my $Sed = 1; $Sed <= $executions; $Sed++) ##Realizar 35 ejecuciones con distintas semilla de cada instancia..
 	{
-	      my $command = "cat ../Results/report_".$time."_".$population."_".$executions."_".$Sed.".output | ./evaluator";
+	      my $command = "cat ../Results/report_".$time."_".$population."_".$executions."_".$Sed.".output | ./evaluator-penalizations";
 	      print `$command`."\n";
-#	      my $file = "input_".$time."_".$population."_".$executions."_".$Sed;
-#	      my $fout;
-#	      open($fout, '>' ,$file);
-#	      print $fout "PROBLEM_FILE = /home/joel.chacon/KAGGLE/Phase1-Optimizer/data/kagglesanta2018.197769.tsp-informat\n";
-#	      print $fout "RUNS = 100000000000000\n";
-#	      print $fout "OUTPUT_TOUR_FILE=//home/joel.chacon/KAGGLE/Phase1-Optimizer/Ready-Phase1/report_".$time."_".$population."_".$executions."_".$Sed.".output\n";
-#	      print $fout "MAX_TRIALS=25\n";
-#	      print $fout "TOTAL_TIME_LIMIT = $time\n";
-#	      print $fout "TRACE_LEVEL = 0\n";
-#	      print $fout "POPULATION_SIZE = $population\n";
-#	      print $fout "INIT_P = 0.5\n";
-#	      print $fout "CANDIDATE_FILE=/home/joel.chacon/KAGGLE/Phase1-Optimizer/tmp/lkh-kagglesanta\n";
-#	      print $fout "PI_FILE=/home/joel.chacon/KAGGLE/Phase1-Optimizer/tmp/lkh-kagglesanta.pifile\n";
-#	      print $fout "MOVE_TYPE=5\n";
-#	      print $fout "SEED=$Sed\n";
-#	      close($fout);
 	}
 }
