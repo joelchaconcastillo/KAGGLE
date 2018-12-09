@@ -92,7 +92,7 @@ void load_path(vi &li) //tail -n +7 File to avoid the header...
        int64 id;
 
     scanf("Path\n");
-    for(int i = 0; i < NCITIES+2; i++)//go back to the source
+    for(int i = 0; i < NCITIES+1; i++)//go back to the source
     {
        scanf("%Ld\n", &id);
        li.pb(id);
