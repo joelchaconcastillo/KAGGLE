@@ -1,0 +1,6 @@
+The evaluator is compiled in linux with the next commnad:
+   g++ evaluator.cpp o evaluator
+To compute the score of a specific path is as follows:
+   cat sample_submission.csv | ./evaluator
+
+note: the cities.csv is needed!
