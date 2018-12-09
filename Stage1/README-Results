@@ -1,0 +1,2 @@
+Each file in the "Results" directory is named according the structure:
+  "report_" + seconds + "_" + size-population + "_" + number-runs + "_" + seed
