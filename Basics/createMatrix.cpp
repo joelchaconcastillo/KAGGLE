@@ -30,12 +30,13 @@ void readInstance(int *argc, char ***argv){
     strcpy(fileInstance, (*argv)[1]);
     FILE *file = fopen(fileInstance, "r");
     n = 0;
-    int x, y, id;
+    double x, y;
+    int id;
     fscanf(file, " %s", trash);
-    while(fscanf(file, "%d %d %d", &id, &x, &y) != EOF){
-        cities[n].id = id;
-        cities[n].x = x;
-        cities[n].y = y;
+    while(fscanf(file, "%d %lf %lf", &id, &x, &y) != EOF){
+        cities[id].id = id;
+        cities[id].x = round(1000.0*x);
+        cities[id].y = round(1000.0*y);
         n++;
     }
     fclose(file);
@@ -48,9 +49,9 @@ void readSolution(int *argc, char ***argv){
     fclose(file);
 }
 
-double INF = -1.0;
-int L = 3;
-double C = 0;
+long long INF = 1e6;
+int L = 10;
+double C = 100;
 
 
 bitset<1001000> isPrime;
@@ -64,11 +65,11 @@ void sieve(long long upperbound){
     }
 }
 
-double dist(int pos, int c1, int c2){
-    double d = sqrt((cities[c1].x - cities[c2].x)*(cities[c1].x - cities[c2].x) + (cities[c1].y - cities[c2].y)*(cities[c1].y - cities[c2].y));
+long long dist(int pos, int c1, int c2){
+    long long d = round(sqrt((cities[c1].x - cities[c2].x)*(cities[c1].x - cities[c2].x) + (cities[c1].y - cities[c2].y)*(cities[c1].y - cities[c2].y)));
     if(pos%L == 0){
         if(isPrime[c1]) return d;
-        else return 1.1*d;
+        else return round(1.1*d);
     }
     else return d;
 }
@@ -76,9 +77,7 @@ double dist(int pos, int c1, int c2){
 void constructMatrix(int l, int r){
     int len = r - l + 1;
     int sizeMatrix = L*len + 2;
-    vector<vector<double> > distances(sizeMatrix, vector<double>(sizeMatrix, 0.0));
-    for(int i = 0; i < sizeMatrix; i++)
-        for(int j = 0; j < sizeMatrix; j++) distances[i][j] = INF;
+    vector<vector<long long> > distances(sizeMatrix, vector<long long>(sizeMatrix, INF));
     
     int nL = sizeMatrix - 2;
     int nR = sizeMatrix - 1;
@@ -110,10 +109,10 @@ void constructMatrix(int l, int r){
             }
 
     // Imprimir matriz
-    printf("Matrix:\n");
+    printf("Header:\n");
     for(int i = 0; i < sizeMatrix; i++)
         for(int j = 0; j < sizeMatrix; j++)
-            printf("%.1f%c", distances[i][j], j == sizeMatrix - 1 ? '\n' : ' ');
+            printf("%lld%c", distances[i][j], j == sizeMatrix - 1 ? '\n' : ' ');
 }
 
 int main(int argc, char **argv){
