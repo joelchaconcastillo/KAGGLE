@@ -50,6 +50,7 @@ void readSolution(int *argc, char ***argv){
 
 double INF = -1.0;
 int L = 3;
+double C = 0;
 
 
 bitset<1001000> isPrime;
@@ -71,49 +72,6 @@ double dist(int pos, int c1, int c2){
     }
     else return d;
 }
-
-void solve(int start, int len){
-    int curCities[len], position[len];
-    for(int i = 0; i < len; i++) curCities[i] = path[(start + i)%n], position[i] = (start + i)%n;
-    double dp[(1 << len)][len];
-    int bestIdx[(1 << len)][len];
-
-    int btmMax = (1 << len);
-    
-    for(int u = 0; u < len; u++) dp[0][u] = INF;
-    dp[0][0] = 0.0;
-    bestIdx[0][0] = -1;
-
-    for(int btm = 1; btm < btmMax; btm++){
-        int btmSize = __builtin_popcount(btm);
-        for(int u = 0; u < len; u++) if((btm & (1 << u)) == 0) {
-            dp[btm][u] = INF;
-            for(int v = 0; v < len; v++) if((btm & (1 << v)) != 0){
-                double curValue = dp[btm - (1 << v)][v] + dist(start + btmSize, curCities[v], curCities[u]);
-                if(curValue < dp[btm][u]){
-                    dp[btm][u] = curValue;
-                    bestIdx[btm][u] = v;
-                }
-            }
-        }
-    }
-
-
-    int pos = len - 1;
-    int u = len - 1;
-    int btm = (1 << u) - 1;
-    while(u >= 0){
-        path[position[pos]] = curCities[u];
-        pos--;
-        int v = bestIdx[btm][u];
-        btm -= (1 << v);
-        u = v;
-    }
-}
-
-
-double C = 0;
-
 
 void constructMatrix(int l, int r){
     int len = r - l + 1;
@@ -157,7 +115,6 @@ void constructMatrix(int l, int r){
         for(int j = 0; j < sizeMatrix; j++)
             printf("%.1f%c", distances[i][j], j == sizeMatrix - 1 ? '\n' : ' ');
 }
-
 
 int main(int argc, char **argv){
     sieve(400000);// printf("End Sieve\n");
