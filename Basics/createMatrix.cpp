@@ -32,8 +32,8 @@ void readInstance(int *argc, char ***argv){
     n = 0;
     double x, y;
     int id;
-    fscanf(file, " %s", trash);
-    while(fscanf(file, "%d %lf %lf", &id, &x, &y) != EOF){
+    fscanf(file, " %s\n", trash);
+    while(fscanf(file, "%d,%lf,%lf\n", &id, &x, &y) != EOF){
         cities[id].id = id;
         cities[id].x = round(1000.0*x);
         cities[id].y = round(1000.0*y);
@@ -43,8 +43,10 @@ void readInstance(int *argc, char ***argv){
 }
 
 void readSolution(int *argc, char ***argv){
+    char trash[100];
     strcpy(fileSolution, (*argv)[2]);
     FILE *file = fopen(fileSolution, "r");
+    fscanf(file, " %s\n", trash);
     for(int i = 0; i < n; i++) fscanf(file, "%d", path + i + 1);
     fclose(file);
 }
@@ -109,7 +111,7 @@ void constructMatrix(int l, int r){
             }
 
     // Imprimir matriz
-    printf("Header:\n");
+    printf("NAME : KAGGLE\nTYPE : ATSP\nDIMENSION : %d\nEDGE_WEIGHT_TYPE: EXPLICIT\nEDGE_WEIGHT_FORMAT: FULL_MATRIX \nEDGE_WEIGHT_SECTION\n", sizeMatrix);
     for(int i = 0; i < sizeMatrix; i++)
         for(int j = 0; j < sizeMatrix; j++)
             printf("%lld%c", distances[i][j], j == sizeMatrix - 1 ? '\n' : ' ');
