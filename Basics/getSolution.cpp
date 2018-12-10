@@ -12,7 +12,7 @@ using namespace std;
 #define nd second
 #define ll long long
 #define pii pair<int, int>
-
+#define NCITIES 
 int L = 10;
 int n;
 const int MAX = 1001000;
@@ -26,9 +26,14 @@ void readNewSolution(int *argc, char ***argv){
     strcpy(fileSolution, (*argv)[1]);
     char trash[100];
     FILE *file = fopen(fileSolution, "r");
-    fscanf(file, " %s", trash);
+    fscanf(file, "%[^\n]\n", trash); //HEADER of six lines...
+    fscanf(file, "%[^\n]\n", trash);
+    fscanf(file, "%[^\n]\n", trash);
+    fscanf(file, "%[^\n]\n", trash);
+    fscanf(file, "%[^\n]\n", trash);
+    fscanf(file, "%[^\n]\n", trash);
     n = 0;
-    while(fscanf(file, "%d", path + n) != EOF){
+    while(fscanf(file, "%d\n", path + n) != EOF){
         n++;
         if(path[n - 1] == -1){
             n--;
@@ -62,9 +67,11 @@ void readOriginalSolution(int *argc, char ***argv){
     strcpy(fileSolution, (*argv)[2]);
     char trash[100];
     FILE *file = fopen(fileSolution, "r");
+    fscanf(file,"%s\n", trash);
     n = 1;
-    while(fscanf(file, "%d", path + n) != EOF){
+    while(fscanf(file, "%d\n", path + n) != EOF){
         n++;
+	if(path[n]==-1) break;
     }
     n--;
     fclose(file);
@@ -74,14 +81,15 @@ int l, r;
 void modifySolution(){
     vector<int> p;
     for(int i = l; i <= r; i++) p.pb(path[i]);
-    for(int i = l; i <= r; i++) path[l + i] = p[nPath[i]];
+    for(int i = l; i <= r; i++) path[i] =  p[nPath[i-l+1]];
 }
 
 void printModifiedSolution(int *argc, char ***argv){
     strcpy(fileSolution, (*argv)[2]);
-    FILE *file = fopen(fileSolution, "w");
-    for(int i = 1; i <= n; i++) fprintf(file, "%d%c", path[i], i == n ? '\n' : ' ');
-    fclose(file);
+    //FILE *file = fopen(fileSolution, "w");
+    //for(int i = 1; i <= n; i++) fprintf(file, "%d%c", path[i], i == n ? '\n' : ' ');
+    for(int i = 1; i <= n; i++) printf("%d\n", path[i]);
+    //fclose(file);
 }
 
 int main(int argc, char **argv){

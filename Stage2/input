@@ -1,6 +1,6 @@
 PROBLEM_FILE = /home/joel.chacon/KAGGLE/git/KAGGLE/Stage2/prueba
 RUNS = 100000000000000
-OUTPUT_TOUR_FILE=/home/joel.chacon/KAGGLE/git/KAGGLE/Stage2/outs/a
+OUTPUT_TOUR_FILE=/home/joel.chacon/KAGGLE/git/KAGGLE/Stage2/outs/output
 MAX_TRIALS=25
 TOTAL_TIME_LIMIT = 40
 TRACE_LEVEL = 0 
