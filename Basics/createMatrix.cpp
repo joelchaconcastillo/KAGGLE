@@ -121,5 +121,5 @@ int main(int argc, char **argv){
     readSolution(&argc, &argv);// printf("Read Solution\n");
 
     int l = atoi(argv[3]), r = atoi(argv[4]);
-    constructMatrix(l, r);
+    constructMatrix(l, r); // 100 200
 }
