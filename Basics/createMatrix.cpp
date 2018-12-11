@@ -104,7 +104,7 @@ void constructMatrix(int l, int r){
     curMod = (r+1)%L;
     for(int i = 0; i < len; i++){
         //distances[L*i + curMod][nR] = dist(curMod, path[l + i], path[r + 1]) + C;
-        distances[L*i + (curMod) % L][nR] = dist(curMod, path[l + i], path[r + 1]) + C;
+        distances[L*i + curMod][nR] = dist(curMod, path[l + i], path[r + 1]) + C;
     }
 
     // Nodo del mismo nivel al modulo previo
