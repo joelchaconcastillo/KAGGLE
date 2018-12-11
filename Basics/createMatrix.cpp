@@ -72,6 +72,7 @@ void sieve(long long upperbound){
 
 long long dist(int pos, int c1, int c2){
     long long d = round(sqrt((cities[c1].x - cities[c2].x)*(cities[c1].x - cities[c2].x) + (cities[c1].y - cities[c2].y)*(cities[c1].y - cities[c2].y)));
+    pos++; // Esta es la parte que agregue
     if(pos%L == 0){
         if(isPrime[c1]) return d;
         else return round(1.1*d);
