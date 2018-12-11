@@ -12,7 +12,7 @@ using namespace std;
 #define nd second
 #define ll long long
 #define pii pair<int, int>
-#define NCITIES 
+#define NCITIES 197769
 int L = 10;
 int n;
 const int MAX = 1001000;
@@ -32,14 +32,21 @@ void readNewSolution(int *argc, char ***argv){
     fscanf(file, "%[^\n]\n", trash);
     fscanf(file, "%[^\n]\n", trash);
     fscanf(file, "%[^\n]\n", trash);
-    n = 0;
-    while(fscanf(file, "%d\n", path + n) != EOF){
-        n++;
-        if(path[n - 1] == -1){
-            n--;
-            break;
-        }
+    int l = atoi((*argv)[3]), r = atoi((*argv)[4]);
+    n = (r-l+2)*L;
+    cout << n <<endl;
+    for(int i = 0; i < n; i++) 
+    {
+	fscanf(file, "%d\n", path + i);
     }
+   // n = 0;
+   // while(fscanf(file, "%d\n", path + n) != EOF){
+   //     n++;
+   //     if(path[n - 1] == -1){
+   //         n--;
+   //         break;
+   //     }
+   // }
     fclose(file);
 }
 
@@ -68,12 +75,17 @@ void readOriginalSolution(int *argc, char ***argv){
     char trash[100];
     FILE *file = fopen(fileSolution, "r");
     fscanf(file,"%s\n", trash);
-    n = 1;
-    while(fscanf(file, "%d\n", path + n) != EOF){
-        n++;
-	if(path[n]==-1) break;
+
+    for(int i = 0; i < NCITIES; i++) 
+    {
+	fscanf(file, "%d\n", path + i);
     }
-    n--;
+   // n = 1;
+   // while(fscanf(file, "%d\n", path + n) != EOF){
+   //     n++;
+   //     if(path[n]==-1) break;
+   // }
+   // n--;
     fclose(file);
 }
 
