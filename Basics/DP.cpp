@@ -48,8 +48,8 @@ void readSolution(int *argc, char ***argv){
     fclose(file);
 }
 
-double INF = -1.0;
-int L = 3;
+double INF = 1e10;
+int L = 10;
 
 
 bitset<1001000> isPrime;
@@ -72,7 +72,7 @@ double dist(int pos, int c1, int c2){
     else return d;
 }
 
-void solve(int start, int len){
+bool solve(int start, int len){
     int curCities[len], position[len];
     for(int i = 0; i < len; i++) curCities[i] = path[(start + i)%n], position[i] = (start + i)%n;
     double dp[(1 << len)][len];
@@ -89,7 +89,7 @@ void solve(int start, int len){
         for(int u = 0; u < len; u++) if((btm & (1 << u)) == 0) {
             dp[btm][u] = INF;
             for(int v = 0; v < len; v++) if((btm & (1 << v)) != 0){
-                double curValue = dp[btm - (1 << v)][v] + dist(start + btmSize, curCities[v], curCities[u]);
+                double curValue = dp[btm - (1 << v)][v] + dist(start + btmSize - 1, curCities[v], curCities[u]);
                 if(curValue < dp[btm][u]){
                     dp[btm][u] = curValue;
                     bestIdx[btm][u] = v;
@@ -98,6 +98,9 @@ void solve(int start, int len){
         }
     }
 
+    double curValue = 0.0;
+
+    for(int i = 0; i < len - 1; i++) curValue += dist(start + i, path[(start + i)%n], path[(start + i + 1)%n]);
 
     int pos = len - 1;
     int u = len - 1;
@@ -109,53 +112,27 @@ void solve(int start, int len){
         btm -= (1 << v);
         u = v;
     }
+
+    return curValue > dp[((1 << (len - 1))) - 1][len - 1];
 }
 
 
-double C = 0;
+void localSearch(int len){
+    int permutation[n];
+    for(int i = 0; i < n; i++) permutation[i] = i + 1;
+    while(true){
+        bool p = false;
 
+        random_shuffle(permutation, permutation + n);
 
-void constructMatrix(int l, int r){
-    int len = r - l + 1;
-    int sizeMatrix = L*len + 2;
-    vector<vector<double> > distances(sizeMatrix, vector<double>(sizeMatrix, 0.0));
-    for(int i = 0; i < sizeMatrix; i++)
-        for(int j = 0; j < sizeMatrix; j++) distances[i][j] = INF;
-    
-    int nL = sizeMatrix - 2;
-    int nR = sizeMatrix - 1;
-    // Nodo final a nodo inicial
-    distances[nR][nL] = 0;
-
-    // Nodo inicial a todos los demas nodos
-    int curMod = (l - 1)%L;
-    for(int i = 0; i < len; i++){
-        distances[nL][L*i + (curMod + 1)%L] = dist(curMod, path[l - 1], path[l + i]) + C;
-    }
-
-    // Todos los nodos a nodo final
-    curMod = r%L;
-    for(int i = 0; i < len; i++){
-        distances[L*i + curMod][nR] = dist(curMod, path[l + i], path[r + 1]) + C;
-    }
-
-    // Nodo del mismo nivel al modulo previo
-    for(int i = 0; i < len; i++)
-        for(int m = 0; m < L; m++)
-            distances[L*i + m][L*i + (m - 1 + L)%L] = 0;
-
-    // Aristas sobre cada nivel del multigrafo
-    for(int m = 0; m < L; m++)
-        for(int i = 0; i < len; i++)
-            for(int j = 0; j < len; j++){
-                distances[L*i + m][L*j + m] = dist(m - 1, path[l + i], path[l + j]) + C;
+        for(int i = 0; i < n; i++){
+            if(solve(permutation[i], len)){
+                p = true;
             }
+        }
 
-    // Imprimir matriz
-    printf("Matrix:\n");
-    for(int i = 0; i < sizeMatrix; i++)
-        for(int j = 0; j < sizeMatrix; j++)
-            printf("%.1f%c", distances[i][j], j == sizeMatrix - 1 ? '\n' : ' ');
+        if(!p) break;
+    }
 }
 
 
@@ -163,7 +140,6 @@ int main(int argc, char **argv){
     sieve(400000);// printf("End Sieve\n");
     readInstance(&argc, &argv);// printf("Read Instance\n");
     readSolution(&argc, &argv);// printf("Read Solution\n");
-
-    int l = atoi(argv[3]), r = atoi(argv[4]);
-    constructMatrix(l, r);
+    int len = atoi(argv[3]);
+    localSearch(len);
 }
