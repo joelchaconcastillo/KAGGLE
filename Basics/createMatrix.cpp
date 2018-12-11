@@ -35,8 +35,11 @@ void readInstance(int *argc, char ***argv){
     fscanf(file, " %s\n", trash);
     while(fscanf(file, "%d,%lf,%lf\n", &id, &x, &y) != EOF){
         cities[id].id = id;
-        cities[id].x = round(1000.0*x);
-        cities[id].y = round(1000.0*y);
+        //cities[id].x = round(1000.0*x);
+        //cities[id].y = round(1000.0*y);
+        cities[id].x = round(x); //KHL only can recieve a matrix-integers only..
+        cities[id].y = round(y);
+
         n++;
     }
     fclose(file);
@@ -77,8 +80,13 @@ long long dist(int pos, int c1, int c2){
 }
 
 void constructMatrix(int l, int r){
+	long long currentCost = 0; // check the currentCost and check if the KHL is working...
+	for (int i = l -1; i <= r; i++){
+		currentCost += (dist(i, path[i], path[i+1]) + C);
+	}
+	
     int len = r - l + 1;
-    int sizeMatrix = L*len + 2;
+    int sizeMatrix = L*len + 2; //plus 2 cuz the edges that owns to start and end nodes are considered..
     vector<vector<long long> > distances(sizeMatrix, vector<long long>(sizeMatrix, INF));
     
     int nL = sizeMatrix - 2;
@@ -93,9 +101,10 @@ void constructMatrix(int l, int r){
     }
 
     // Todos los nodos a nodo final
-    curMod = r%L;
+    curMod = (r+1)%L;
     for(int i = 0; i < len; i++){
-        distances[L*i + curMod][nR] = dist(curMod, path[l + i], path[r + 1]) + C;
+        //distances[L*i + curMod][nR] = dist(curMod, path[l + i], path[r + 1]) + C;
+        distances[L*i + (curMod) % L][nR] = dist(curMod, path[l + i], path[r + 1]) + C;
     }
 
     // Nodo del mismo nivel al modulo previo
@@ -109,9 +118,8 @@ void constructMatrix(int l, int r){
             for(int j = 0; j < len; j++){
                 distances[L*i + m][L*j + m] = dist(m - 1, path[l + i], path[l + j]) + C;
             }
-
     // Imprimir matriz
-    printf("NAME : KAGGLE\nTYPE : ATSP\nDIMENSION : %d\nEDGE_WEIGHT_TYPE: EXPLICIT\nEDGE_WEIGHT_FORMAT: FULL_MATRIX \nEDGE_WEIGHT_SECTION\n", sizeMatrix);
+    printf("NAME : KAGGLE suma costos desde %d a %d %lld  \nTYPE : ATSP\nDIMENSION : %d\nEDGE_WEIGHT_TYPE: EXPLICIT\nEDGE_WEIGHT_FORMAT: FULL_MATRIX \nEDGE_WEIGHT_SECTION\n", l-1, r+1, currentCost, sizeMatrix);
     for(int i = 0; i < sizeMatrix; i++)
         for(int j = 0; j < sizeMatrix; j++)
             printf("%lld%c", distances[i][j], j == sizeMatrix - 1 ? '\n' : ' ');
