@@ -17,7 +17,7 @@ const int MAX = 1001000;
 
 struct city{
     int id;
-    long long x, y;
+    double x, y;
 };
 
 char fileInstance[1010], fileSolution[1010];
@@ -29,18 +29,19 @@ void readInstance(int *argc, char ***argv){
     char trash[100];
     strcpy(fileInstance, (*argv)[1]);
     FILE *file = fopen(fileInstance, "r");
-    n = 0;
+    int N = n = 197769;
     double x, y;
     int id;
     fscanf(file, " %s\n", trash);
-    while(fscanf(file, "%d,%lf,%lf\n", &id, &x, &y) != EOF){
+    while(N--){
+        fscanf(file, "%d,%lf,%lf\n", &id, &x, &y);
         cities[id].id = id;
         //cities[id].x = round(1000.0*x);
         //cities[id].y = round(1000.0*y);
-        cities[id].x = round(x); //KHL only can recieve a matrix-integers only..
-        cities[id].y = round(y);
+        cities[id].x = x; //KHL only can recieve a matrix-integers only..
+        cities[id].y = y;
 
-        n++;
+        //n++;
     }
     fclose(file);
 }
@@ -50,7 +51,7 @@ void readSolution(int *argc, char ***argv){
     FILE *file = fopen(fileSolution, "r");
     char trash[100];
     fscanf(file, " %s", trash);
-    for(int i = 0; i < n; i++) fscanf(file, "%d", path + i + 1);
+    for(int i = 0; i < n; i++) fscanf(file, "%d", path + i), path[i]--;
     fclose(file);
 }
 
@@ -81,9 +82,8 @@ double dist(int pos, int c1, int c2){
 
 double evaluate(){
     double len = 0.0;
-    for(int i = 1; i <= n; i++){
-        int j = i + 1;
-        if(j > n) j -= n;
+    for(int i = 0; i < n; i++){
+        int j = (i + 1)%n;
         len += dist(i, path[i], path[j]);
     }
     return len;
@@ -151,7 +151,7 @@ bool solve(int start, int len){
 
 void localSearch(int len){
     int permutation[n];
-    for(int i = 0; i < n; i++) permutation[i] = i + 1;
+    for(int i = 0; i < n; i++) permutation[i] = i;
     while(true){
         bool p = false;
 
