@@ -30,12 +30,16 @@ void readInstance(int *argc, char ***argv){
     strcpy(fileInstance, (*argv)[1]);
     FILE *file = fopen(fileInstance, "r");
     n = 0;
-    int x, y, id;
-    fscanf(file, " %s", trash);
-    while(fscanf(file, "%d %d %d", &id, &x, &y) != EOF){
-        cities[n].id = id;
-        cities[n].x = x;
-        cities[n].y = y;
+    double x, y;
+    int id;
+    fscanf(file, " %s\n", trash);
+    while(fscanf(file, "%d,%lf,%lf\n", &id, &x, &y) != EOF){
+        cities[id].id = id;
+        //cities[id].x = round(1000.0*x);
+        //cities[id].y = round(1000.0*y);
+        cities[id].x = round(x); //KHL only can recieve a matrix-integers only..
+        cities[id].y = round(y);
+
         n++;
     }
     fclose(file);
@@ -44,6 +48,8 @@ void readInstance(int *argc, char ***argv){
 void readSolution(int *argc, char ***argv){
     strcpy(fileSolution, (*argv)[2]);
     FILE *file = fopen(fileSolution, "r");
+    char trash[100];
+    fscanf(file, " %s", trash);
     for(int i = 0; i < n; i++) fscanf(file, "%d", path + i + 1);
     fclose(file);
 }
@@ -65,6 +71,7 @@ void sieve(long long upperbound){
 
 double dist(int pos, int c1, int c2){
     double d = sqrt((cities[c1].x - cities[c2].x)*(cities[c1].x - cities[c2].x) + (cities[c1].y - cities[c2].y)*(cities[c1].y - cities[c2].y));
+    pos++;
     if(pos%L == 0){
         if(isPrime[c1]) return d;
         else return 1.1*d;
@@ -105,14 +112,16 @@ bool solve(int start, int len){
     int pos = len - 1;
     int u = len - 1;
     int btm = (1 << u) - 1;
-    while(u >= 0){
+    while(true){
         path[position[pos]] = curCities[u];
         pos--;
         int v = bestIdx[btm][u];
+        if(v < 0) break;
         btm -= (1 << v);
         u = v;
     }
 
+    printf("%lf\n", curValue - dp[((1 << (len - 1))) - 1][len - 1]);
     return curValue > dp[((1 << (len - 1))) - 1][len - 1];
 }
 

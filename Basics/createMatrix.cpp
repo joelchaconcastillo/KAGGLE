@@ -29,18 +29,17 @@ void readInstance(int *argc, char ***argv){
     char trash[100];
     strcpy(fileInstance, (*argv)[1]);
     FILE *file = fopen(fileInstance, "r");
-    n = 0;
+    int N = n = 197769;
     double x, y;
     int id;
     fscanf(file, " %s\n", trash);
-    while(fscanf(file, "%d,%lf,%lf\n", &id, &x, &y) != EOF){
+    while(N--){
+        fscanf(file, "%d,%lf,%lf\n", &id, &x, &y);
         cities[id].id = id;
         //cities[id].x = round(1000.0*x);
         //cities[id].y = round(1000.0*y);
         cities[id].x = round(x); //KHL only can recieve a matrix-integers only..
         cities[id].y = round(y);
-
-        n++;
     }
     fclose(file);
 }
@@ -50,7 +49,7 @@ void readSolution(int *argc, char ***argv){
     strcpy(fileSolution, (*argv)[2]);
     FILE *file = fopen(fileSolution, "r");
     fscanf(file, " %s\n", trash);
-    for(int i = 0; i < n; i++) fscanf(file, "%d", path + i + 1);
+    for(int i = 0; i < n; i++) fscanf(file, "%d", path + i);
     fclose(file);
 }
 
