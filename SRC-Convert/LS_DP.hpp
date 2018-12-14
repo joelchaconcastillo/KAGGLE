@@ -25,6 +25,7 @@ bool solve(int start, int len){
         for(int u = 0; u < len; u++) if((btm & (1 << u)) == 0) { // check if the city has been visitied
             dp[btm][u] = INF;
             for(int v = 0; v < len; v++) if((btm & (1 << v)) != 0){
+                //double curValue = dp[btm - (1 << v)][v] + distdtsp(start + btmSize - 1, curCities[v], curCities[u]);
                 double curValue = dp[btm - (1 << v)][v] + distd(start + btmSize - 1, curCities[v], curCities[u]);
                 if(curValue < dp[btm][u]){
                     dp[btm][u] = curValue;
@@ -36,6 +37,7 @@ bool solve(int start, int len){
 
     double curValue = 0.0;
 
+    //for(int i = 0; i < len - 1; i++) curValue += distdtsp(start + i, nPath[(start + i)%n], nPath[(start + i + 1)%n]);
     for(int i = 0; i < len - 1; i++) curValue += distd(start + i, nPath[(start + i)%n], nPath[(start + i + 1)%n]);
 
     int pos = len - 1;
@@ -55,7 +57,8 @@ bool solve(int start, int len){
 
     double tt = evaluate(nPath);
     mn = min(mn, tt);
-    printf("%lf\n", mn);
+ //  fprintf(stderr, "pivot %d\n", start);	
+    //printf("%lf\n", mn);
     //printf("*%lf\n", ss - tt);
 
     //printf("%lf\n", curValue - dp[((1 << (len - 1))) - 1][len - 1]);
@@ -64,7 +67,6 @@ bool solve(int start, int len){
 
 
 void localSearch(){
-    int len = r;//r-l+1;
     int n = NCITIES;
     int permutation[n];
     for(int i = 0; i < n; i++){
@@ -74,14 +76,17 @@ void localSearch(){
     while(true){
         bool p = false;
 
-        random_shuffle(permutation, permutation + n);
-
+        //random_shuffle(permutation, permutation + n);
         for(int i = 0; i < n; i++){
             if(solve(permutation[i], len)){
+		
                 p = true;
+		printf("pivot %d %f\n", i, evaluate(nPath));
+    		saveNewSolution();
             }
         }
-        if(!p) break;
+        //if(!p) break;
+	break;
     }
 }
 #endif

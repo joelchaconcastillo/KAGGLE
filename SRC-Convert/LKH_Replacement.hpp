@@ -25,7 +25,7 @@ void LKH_Replacement()
 {
 
    //////Build matrix with virtual nodes and construct the input-param file that is required for the KHL tool
-    constructMatrix(l, r); // 100 200
+    constructMatrix();
     int id = seed; 
     char temporalfile[1000];
     sprintf(temporalfile, "%s/../tmp/%d",currentDirectory, id );

@@ -16,7 +16,7 @@ void createInputParamKHL3(char * fileInstance, char *tourfile, int id)
     //fprintf(file, "INIT_P = 0.5\n");
  //   fprintf(file, "CANDIDATE_FILE= %s/../Stage2/tmp/lkh-kagglesanta\n", currentDirectory);
  //   fprintf(file, "PI_FILE= %s/../Stage2/tmp/lkh-kagglesanta.pifile\n", currentDirectory);
-    fprintf(file, "MOVE_TYPE=5\n");
+    fprintf(file, "MOVE_TYPE=3\n");
     fprintf(file, "RUNS=1\n");
  //   fprintf(file, "SEED=1\n");
 
@@ -27,7 +27,7 @@ void LKH3_Procedure()
 {
 
    //////Build matrix with virtual nodes and construct the input-param file that is required for the KHL tool
-    constructMatrix(l, r); // 100 200
+    constructMatrix();
     int id = seed; 
     char temporalfile[1000];
     sprintf(temporalfile, "%s/../tmp/%d",currentDirectory, id );

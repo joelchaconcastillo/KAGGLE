@@ -8,10 +8,13 @@ struct city{
     double x, y;
 };
 char currentDirectory[1000];
+char filename_newSolution[100];
+char filename_oldSolution[100];
+char filename_instance[100];
 city cities[MAX];
 int path[MAX], nPath[MAX], path_segment[MAX];
 bitset<MAX> used;
-int l, r;
+int l, r, len;
 long long INF = 1e6, currentCost;
 int L = 10;
 double C = 100;
@@ -20,31 +23,27 @@ vector<vector<long long> > distances;
 bitset<1001000> isPrime;
 long long sieve_size;
 
-void readInstance(int *argc, char ***argv){
-    char fileInstance[1010];
-    char trash[100];
-    strcpy(fileInstance, (*argv)[1]);
-    FILE *file = fopen(fileInstance, "r");
+void readInstance(){
+    FILE *file = fopen(filename_instance, "r");
     int N = NCITIES;//n = 197769;
     double x, y;
     int id;
+    char trash[100];
     fscanf(file, " %s\n", trash);
     while(N--){
         fscanf(file, "%d,%lf,%lf\n", &id, &x, &y);
         cities[id].id = id;
-        cities[id].x = round(1000.0*x);
-        cities[id].y = round(1000.0*y);
+        cities[id].x = x;
+        cities[id].y = y;
         //cities[id].x = round(x); //KHL only can recieve a matrix-integers only..
         //cities[id].y = round(y);
     }
     fclose(file);
 }
 
-void readSolution(int *argc, char ***argv){
-    char fileSolution[1010];
+void readSolution(){
+    FILE *file = fopen(filename_oldSolution, "r");
     char trash[100];
-    strcpy(fileSolution, (*argv)[2]);
-    FILE *file = fopen(fileSolution, "r");
     fscanf(file, " %s\n", trash);
     for(int i = 0; i < NCITIES; i++) fscanf(file, "%d\n", path + i);
     fclose(file);
@@ -62,7 +61,7 @@ double distd(int pos, int c1, int c2){
     pos++; // Esta es la parte que agregue
     if(pos%L == 0){
         if(isPrime[c1]) return d;
-        else return round(1.1*d);
+        else return 1.1*d;
     }
     else return d;
 }
@@ -75,14 +74,16 @@ long long distl(int pos, int c1, int c2){
     }
     else return d;
 }
-
-void constructMatrix(int l, int r){
+double distdtsp(int pos, int c1, int c2){
+    return (sqrt((cities[c1].x - cities[c2].x)*(cities[c1].x - cities[c2].x) + (cities[c1].y - cities[c2].y)*(cities[c1].y - cities[c2].y)));
+}
+void constructMatrix(){
 	currentCost = 0; // check the currentCost and check if the KHL is working...
-	for (int i = l -1; i <= r; i++){
-		currentCost += (  (distl(i, path[i], path[i+1])) + C);
+	for (int i = l-1; i <= r; i++){
+		currentCost += (  (distl(i, path[(i)%NCITIES], path[(i+1)%NCITIES])) + C);
 	}
-	
-    int len = r - l + 1;
+
+    //int len = r - l + 1;
     int sizeMatrix = L*len + 2; //plus 2 cuz the edges that owns to start and end nodes are considered..
     //vector<vector<long long> > distances(sizeMatrix, vector<long long>(sizeMatrix, INF));
     distances.resize(sizeMatrix, vector<long long>(sizeMatrix, INF));
@@ -95,14 +96,14 @@ void constructMatrix(int l, int r){
     // Nodo inicial a todos los demas nodos
     int curMod = (l - 1)%L;
     for(int i = 0; i < len; i++){
-        distances[nL][L*i + (curMod + 1)%L] = (distl(curMod, path[l - 1], path[l + i])) + C;
+        distances[nL][L*i + (curMod + 1)%L] = (distl(curMod, path[l - 1], path[(l + i)%NCITIES])) + C;
         //distances[nL][L*i + (l)%L] = dist( l , path[l - 1], path[l + i]) + C;
     }
 
     // Todos los nodos a nodo final
     curMod = (r)%L;
     for(int i = 0; i < len; i++){
-        distances[L*i + (curMod+1)%L][nR] = distl(curMod, path[l + i], path[r + 1]) + C;
+        distances[L*i + (curMod+1)%L][nR] = distl(curMod, path[(l + i)%NCITIES], path[(r + 1)%NCITIES]) + C;
         //distances[L*i + (r)%L][nR] = dist(r+1, path[l + i], path[r + 1]) + C;
     }
 
@@ -115,7 +116,7 @@ void constructMatrix(int l, int r){
     for(int m = 0; m < L; m++)
         for(int i = 0; i < len; i++)
             for(int j = 0; j < len; j++){
-                distances[L*i + m][L*j + m] = distl(m - 1, path[l + i], path[l + j]) + C;
+                distances[L*i + m][L*j + m] = distl(m - 1, path[(l + i)%NCITIES], path[(l + j)%NCITIES]) + C;
             }
 }
 void saveMatrix(char *fileInstance) //save a temporal file, which will be an input to the KHL tool
@@ -150,57 +151,39 @@ void readNewSolution(char *fileSolution){
     fclose(file);
 }
 void transformPath(){
-    for(int i = 0; i < NCITIES; i++) nPath[i] = path[i];
+    for(int i = 0; i < NCITIES; i++) nPath[i] = path[i]; //copy path 
     int n = (r-l+1)*L+2;
     int len = n/L, start = -1;
     for(int i = 0; i < n; i++){
         if(path_segment[i] == n - 1) start = i;
         if(path_segment[i] < n - 1) path_segment[i] = (path_segment[i] - 1) / L;
     }
-//   cout << "startt "<< path_segment[start]<<endl;
+   cout << "startt "<< path_segment[start]<<endl;
 //    for(int i = 0; i < n; i++) cout << path_segment[i]<<endl;
     int i = start+1; // the first node is not taken into account
     int nlen = 0;
     while(path_segment[i] != n){
         if(!used[path_segment[i]]){
             used[path_segment[i]] = true;
-            nPath[nlen++] = path_segment[i]+l;
+            nPath[nlen++] = (path_segment[i]+l)%NCITIES;
         }
         i = (i + 1)%n;
     }
 //    for(int i = 0; i < nlen; i++) cout << nPath[i]<<endl;
-}
-void readOriginalSolution(int *argc, char ***argv){
-
-    char fileSolution[1010];
-    strcpy(fileSolution, (*argv)[2]);
-    char trash[100];
-    FILE *file = fopen(fileSolution, "r");
-    fscanf(file,"%s\n", trash);
-
-    for(int i = 0; i < NCITIES; i++) 
-    {
-	fscanf(file, "%d\n", path + i);
-    }
-   // n = 1;
-   // while(fscanf(file, "%d\n", path + n) != EOF){
-   //     n++;
-   //     if(path[n]==-1) break;
-   // }
-   // n--;
-    fclose(file);
 }
 void modifySolution(){
 //    vector<int> p;
 //    for(int i = l; i <= r; i++) p.pb(path[i]);
     for(int i = l,k = 0; i <= r; i++, k++) path[i] = nPath[k];// p[k];//nPath[k];// p[nPath[k]];
 }
-void saveNewSolution(int *argc, char ***argv)
+void saveNewSolution()
 {
-    char fileSolution[1010];
-    strcpy(fileSolution, (*argv)[5]);
-    FILE * file = fopen(fileSolution, "w");
+  //  char fileSolution[1010];
+  //  strcpy(fileSolution, (*argv)[5]);
+  //  FILE * file = fopen(fileSolution, "w");
+    FILE * file = fopen(filename_newSolution, "w");
     for(int i = 0; i < NCITIES; i++) fprintf(file, "%d\n", nPath[i]);
+    fclose(file);
 }
 
 double evaluate(int *pathc){

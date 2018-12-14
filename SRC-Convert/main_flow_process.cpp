@@ -32,19 +32,28 @@ using namespace std;
 #include "LKH_Replacement.hpp"
 #include "LKH3.hpp"
 #include "LS_DP.hpp"
+void readParams(int *argc, char ***argv)
+{
+    strcpy(filename_instance, (*argv)[1]);
+    strcpy(filename_oldSolution, (*argv)[2]);
+     l = atoi((*argv)[3]);
+    len = atoi((*argv)[4]);
+    strcpy(filename_newSolution, (*argv)[5]);
+    seed = atoi((*argv)[6]);
+    r = len + l - 1; // the code recives the left index and the pivot..
 
+}
 int main(int argc, char **argv){
 
 
   ///////Prepare data and read information
     sieve(400000);// printf("End Sieve\n");
-    readInstance(&argc, &argv);// printf("Read Instance\n");
-    readSolution(&argc, &argv);// printf("Read Solution\n");
+    readParams(&argc, &argv);
+    readSolution();
+    readInstance();
     strcpy(currentDirectory, "/home/joel.chacon/KAGGLE/git/KAGGLE/SRC-Convert");
-    l = atoi(argv[3]);
-    r = atoi(argv[4]);
-    seed = atoi(argv[6]);
     //int IMPROVEMENT = LKH3;//LKH_REPLACEMENT;
+
      int IMPROVEMENT = DP;// LKH_REPLACEMENT;
     switch(IMPROVEMENT)
     {
@@ -59,7 +68,7 @@ int main(int argc, char **argv){
        break;
     }
 
-    saveNewSolution(&argc, &argv);
+    saveNewSolution();
     printf("Score of old path: %f\n",evaluate(path));
     printf("Score of new path: %f",evaluate(nPath));
 }
