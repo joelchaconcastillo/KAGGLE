@@ -4,7 +4,8 @@ const int MAX = 1001000;
 
 struct city{
     int id;
-    long long x, y;
+    //long long x, y;
+    double x, y;
 };
 char currentDirectory[1000];
 city cities[MAX];
@@ -31,10 +32,10 @@ void readInstance(int *argc, char ***argv){
     while(N--){
         fscanf(file, "%d,%lf,%lf\n", &id, &x, &y);
         cities[id].id = id;
-        //cities[id].x = round(1000.0*x);
-        //cities[id].y = round(1000.0*y);
-        cities[id].x = round(x); //KHL only can recieve a matrix-integers only..
-        cities[id].y = round(y);
+        cities[id].x = round(1000.0*x);
+        cities[id].y = round(1000.0*y);
+        //cities[id].x = round(x); //KHL only can recieve a matrix-integers only..
+        //cities[id].y = round(y);
     }
     fclose(file);
 }
@@ -56,7 +57,16 @@ void sieve(long long upperbound){
         for(long long j = i*i; j < sieve_size; j += i) isPrime[j] = false;
     }
 }
-long long dist(int pos, int c1, int c2){
+double distd(int pos, int c1, int c2){
+    double d = (sqrt((cities[c1].x - cities[c2].x)*(cities[c1].x - cities[c2].x) + (cities[c1].y - cities[c2].y)*(cities[c1].y - cities[c2].y)));
+    pos++; // Esta es la parte que agregue
+    if(pos%L == 0){
+        if(isPrime[c1]) return d;
+        else return round(1.1*d);
+    }
+    else return d;
+}
+long long distl(int pos, int c1, int c2){
     long long d = round(sqrt((cities[c1].x - cities[c2].x)*(cities[c1].x - cities[c2].x) + (cities[c1].y - cities[c2].y)*(cities[c1].y - cities[c2].y)));
     pos++; // Esta es la parte que agregue
     if(pos%L == 0){
@@ -69,7 +79,7 @@ long long dist(int pos, int c1, int c2){
 void constructMatrix(int l, int r){
 	currentCost = 0; // check the currentCost and check if the KHL is working...
 	for (int i = l -1; i <= r; i++){
-		currentCost += (dist(i, path[i], path[i+1]) + C);
+		currentCost += (  (distl(i, path[i], path[i+1])) + C);
 	}
 	
     int len = r - l + 1;
@@ -85,14 +95,14 @@ void constructMatrix(int l, int r){
     // Nodo inicial a todos los demas nodos
     int curMod = (l - 1)%L;
     for(int i = 0; i < len; i++){
-        distances[nL][L*i + (curMod + 1)%L] = dist(curMod, path[l - 1], path[l + i]) + C;
+        distances[nL][L*i + (curMod + 1)%L] = (distl(curMod, path[l - 1], path[l + i])) + C;
         //distances[nL][L*i + (l)%L] = dist( l , path[l - 1], path[l + i]) + C;
     }
 
     // Todos los nodos a nodo final
     curMod = (r)%L;
     for(int i = 0; i < len; i++){
-        distances[L*i + (curMod+1)%L][nR] = dist(curMod, path[l + i], path[r + 1]) + C;
+        distances[L*i + (curMod+1)%L][nR] = distl(curMod, path[l + i], path[r + 1]) + C;
         //distances[L*i + (r)%L][nR] = dist(r+1, path[l + i], path[r + 1]) + C;
     }
 
@@ -105,7 +115,7 @@ void constructMatrix(int l, int r){
     for(int m = 0; m < L; m++)
         for(int i = 0; i < len; i++)
             for(int j = 0; j < len; j++){
-                distances[L*i + m][L*j + m] = dist(m - 1, path[l + i], path[l + j]) + C;
+                distances[L*i + m][L*j + m] = distl(m - 1, path[l + i], path[l + j]) + C;
             }
 }
 void saveMatrix(char *fileInstance) //save a temporal file, which will be an input to the KHL tool
@@ -197,7 +207,7 @@ double evaluate(int *pathc){
     double len = 0.0;
     for(int i = 0; i < NCITIES; i++){
         int j = (i + 1)%NCITIES;
-        len += dist(i, pathc[i], pathc[j]);
+        len += distd(i, pathc[i], pathc[j]);
     }
     return len;
 }

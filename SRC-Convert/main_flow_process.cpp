@@ -63,3 +63,4 @@ int main(int argc, char **argv){
     printf("Score of old path: %f\n",evaluate(path));
     printf("Score of new path: %f",evaluate(nPath));
 }
+
