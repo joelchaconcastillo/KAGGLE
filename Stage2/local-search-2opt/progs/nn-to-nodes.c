@@ -26,10 +26,11 @@ int main(int argc, char **argv) {
       "de todas las ciudades vecinas\n"
       "\n"
       "Uso:\n"
-      "  %s cities cnt\n"
+      "  %s cities cnt [dir]\n"
       "\n"
       "    cities: Archivo con las ciudades\n"
       "    cnt:    Número de vecinos a considerar\n"
+      "    dir:    Ruta al directorio donde se guardan los archivos\n" 
       "\n"; 
 
     printf(help,argv[0]); 
@@ -40,9 +41,17 @@ int main(int argc, char **argv) {
   Inst inst = load_inst(inst_filename); 
   
   int cnt = atoi(argv[2]); 
-  
+
+  char *dir = "near-cities"; 
+  if(argc == 4){ 
+    dir = argv[3]; 
+  } 
+
   tuple nearest[cnt]; 
-  for(int i=0; i < cnt; i+= 1){nearest[i].value = 1/0.0; } 
+  for(int i=0; i < cnt; i+= 1){
+    nearest[i].value = 1/0.0; 
+  } 
+
   // Por cada ciudad encontrar las 'n' ciudades más cercanas
   /* tuple * sorted = (tuple*) malloc(sizeof(tuple)*inst.size); */ 
   for(int from=0; from < inst.size; from += 1){ 
@@ -65,7 +74,7 @@ int main(int argc, char **argv) {
      
     // Escribir a un archivo las 'cnt' ciudades más cercanas 
     char filename[100];
-    sprintf(filename,"out/nearest-to-%d",from); 
+    sprintf(filename,"%s/nearest-to-%d",dir,from); 
     FILE *file = fopen(filename,"w+"); 
     for(int to=0; to < cnt; to += 1){ 
       fprintf(file,"%d\n",nearest[to]);

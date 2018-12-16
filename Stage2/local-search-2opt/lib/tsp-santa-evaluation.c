@@ -8,6 +8,10 @@ void free_path(Path path){
   if(path.tour){ free(path.tour);   } 
 } 
 
+int random_int(int lower, int upper) { 
+  return ( rand() % (upper - lower + 1)) + lower;
+} 
+
 
 Inst load_inst(char* filename) { 
   Inst inst = {0,0,0}; 
@@ -69,6 +73,17 @@ Path load_path(char* filename) {
 } 
 
 
+void export_path(Path path,FILE *file){ 
+  // Se imprime el header
+  fprintf(file,"Path\n"); 
+
+  // Se imprime el recorrido 
+  for(int i=0; i < path.size; i+=1) { 
+    fprintf(file,"%d\n",path.tour[i]); 
+  }
+} 
+
+
 double euc_dist(City city_a,City city_b){ 
   double x = (city_a.x - city_b.x); 
   double y = (city_a.y - city_b.y); 
@@ -77,10 +92,10 @@ double euc_dist(City city_a,City city_b){
 
 
 
-char * sieve(long long max_val) {  
-  char * isprime = (char*) malloc(sizeof(char)*(max_val+1));
+bool * sieve(long long max_val) {  
+  bool * isprime = (bool*) malloc(sizeof(bool)*(max_val+1));
   for(long long i=0; i <= max_val; i+=1){ 
-    isprime[i] = 1; 
+    isprime[i] = true; 
   }
    
   isprime[0] = isprime[1] = 0; 
@@ -88,7 +103,7 @@ char * sieve(long long max_val) {
     if(isprime[i]) { 
       for(long long j = i*i; j <= max_val; j+= i) { 
         if((j % i) == 0) { 
-          isprime[j] = 0;
+          isprime[j] = false;
         }  
       } 
     } 

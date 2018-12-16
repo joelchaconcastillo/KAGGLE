@@ -7,7 +7,7 @@ int main(int argc, char **argv) {
     char *help = ""
       "Aplica la búsqueda local simple con vecindad 2opt a un recorrido inicial\n"
       "\n" 
-      "Requiere de que exista un conjunto de archivos en la ruta \"out\" con el\n"
+      "Requiere de que exista un conjunto de archivos en la ruta \"near-cities\" con el\n"
       "nombre\n"
       "  nearest-to-[id]\n"
       "\n"
@@ -32,10 +32,10 @@ int main(int argc, char **argv) {
   char * path_filename = argv[2]; 
   Path path = load_path(path_filename); 
 
-  puts ("iniciando");
   Path local_optima = two_opt_local_search(inst,path); 
 
-  puts("Se ha terminado la vecindad");
+  // Exportar a stdout el recorrido 
+  export_path(local_optima,stdout); 
 
   free_path(path);
   free_inst(inst); 
