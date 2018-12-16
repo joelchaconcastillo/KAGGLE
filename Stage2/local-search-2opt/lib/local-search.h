@@ -29,10 +29,6 @@ void free_neighborhood(Neighborhood ng);
 // Cargar los ids de las ciudades vecinas
 IdsMatrix load_nearest_cities(Inst inst);
 
-// Regresa un número aleatorio en el rango entre [lower, upper]
-int random_int(int lower, int upper); 
-
-
 // Inicializa la vecindad 
 Neighborhood create_neighborhood(Inst inst);
 

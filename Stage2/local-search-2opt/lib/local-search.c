@@ -37,6 +37,9 @@ void free_neighborhood(Neighborhood ng){
 
 Path two_opt_local_search(Inst inst,Path init_sol){ 
 
+  // Medición del tiempo 
+  time_t tic = time(0); 
+
   Neighborhood ng = create_neighborhood(inst);
  
   Path best_sol = init_sol; 
@@ -52,10 +55,9 @@ Path two_opt_local_search(Inst inst,Path init_sol){
     path.tour[i] = init_sol.tour[i]; 
   } 
   
-  long cnt = 0; 
+  long long it = 0; 
   while(next_two_opt_neighbor(path,&ng)){ 
-    cnt += 1; 
-    printf("%d\r", cnt); 
+    it += 1; 
 
     // Realizar el movimiento 
     two_opt_move(path,ng); 
@@ -65,8 +67,11 @@ Path two_opt_local_search(Inst inst,Path init_sol){
 
     // Si mejora 
     if(fit <  best_fit) { 
-      cnt = 0; 
-      printf("Mejora old: %lf -> new: %lf\n",best_fit,fit);
+      time_t toc = time(0); 
+      fprintf(stderr,"t: %ld :: it: %ld :: dif: %lf :: fit: %lf \n",
+        (toc-tic),it,best_fit - fit,fit);
+      it = 0; 
+
       best_fit = fit; 
       for(int i=0; i < best_sol.size; i += 1){ 
         best_sol.tour[i] = path.tour[i]; 
@@ -104,7 +109,6 @@ bool next_two_opt_neighbor(const Path path, Neighborhood * ng){
 
   // Elegir una posición del recorrido de forma aleatoria 
   if (ng[0].b_index >= ng[0].nearest.cols){
-    /* puts("Reiniciando"); */ 
     // Reinicio el contador de las ciudades cercanas 
     ng[0].b_index = 0; 
 
@@ -157,14 +161,10 @@ void reset_neighborhood(Neighborhood * ng) {
 } 
 
 
-int random_int(int lower, int upper) { 
-  return ( rand() % (upper - lower + 1)) + lower;
-} 
-
 IdsMatrix load_nearest_cities(Inst inst){ 
 
   // Obtenemos la cantidad de ciudades que hay en cada archivo 
-  FILE *file = fopen("out/nearest-to-0","r"); 
+  FILE *file = fopen("near-cities/nearest-to-0","r"); 
   char trash[100]; 
   int near_cities_cnt = 0; 
   while(fscanf(file,"%s\n",trash) == 1){near_cities_cnt += 1; } 
@@ -179,7 +179,7 @@ IdsMatrix load_nearest_cities(Inst inst){
 
   for(int id=0; id < inst.size; id+=1){ 
     nearest_cities.ids[id] = (int*) malloc(sizeof(int*)*nearest_cities.cols); 
-    sprintf(filename,"out/nearest-to-%d",id); 
+    sprintf(filename,"near-cities/nearest-to-%d",id); 
     file = fopen(filename,"r"); 
     for(int nc=0; nc < near_cities_cnt; nc += 1){ 
       fscanf(file,"%d\n",&(nearest_cities.ids[id][nc])); 
