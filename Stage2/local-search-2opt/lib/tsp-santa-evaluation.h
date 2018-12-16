@@ -38,30 +38,34 @@ typedef struct{
 void free_inst(Inst inst); 
 
 // Imprime en el archivo el recorrido 
-//
 void export_path(Path path,FILE *file); 
 
 // Función para cargar las ciudades 
-//
 Inst load_inst(char* filename); 
 
 // Función para cargar el recorrido 
-//
 Path load_path(char* filename); 
 
-// Función para calcular la distancia euclideana
-// entre dos ciudades
-//
+// Función para calcular la distancia euclideana entre dos ciudades
 double euc_dist(City city_a, City city_b); 
 
 // Función para Calcular los números números primos 
-//
 bool * sieve(long long max_value);
 
 // Función que calcula el valor objetivo del recorrido 
-//
 double eval_path(Path path, Inst inst); 
 
 // Generar un número en el rango [a,b] de forma aleatoria 
 int random_int(int lower,int upper); 
+
+// Crea una copia profunda de un recorrido
+Path  clone_path(Path source); 
+
+// Copia el contenido de 'source' en 'dest' 
+void path_copy(Path source, Path des); 
+
+// Cuenta la cantidad de lineas en un archivo
+int get_lines_num(filename); 
+
+
 #endif
