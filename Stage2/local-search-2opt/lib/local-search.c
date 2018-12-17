@@ -49,7 +49,7 @@ Path two_opt_local_search(Inst inst,Path init_sol){
   
   long long it = 0; 
   fprintf(stderr,"t: %ld :: it: %ld :: dif: %lf :: fit: %lf \n",
-    (toc-tic),it,best_fit - fit,fit);
+    (toc-tic),it,0,best_fit);
   while(next_two_opt_neighbor(path,&ng)){ 
     it += 1; 
 
@@ -75,7 +75,7 @@ Path two_opt_local_search(Inst inst,Path init_sol){
 
   toc = time(0); 
   fprintf(stderr,"t: %ld :: it: %ld :: dif: %lf :: fit: %lf \n",
-    (toc-tic),it,best_fit - fit,fit);
+    (toc-tic),it,0,best_fit);
 
   free_path(path); 
   free_neighborhood(ng); 

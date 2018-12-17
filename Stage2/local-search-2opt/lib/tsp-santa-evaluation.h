@@ -65,7 +65,7 @@ Path  clone_path(Path source);
 void path_copy(Path source, Path des); 
 
 // Cuenta la cantidad de lineas en un archivo
-int get_lines_num(filename); 
+int get_lines_num(char * filename); 
 
 
 #endif

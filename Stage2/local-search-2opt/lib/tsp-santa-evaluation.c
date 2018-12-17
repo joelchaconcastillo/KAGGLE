@@ -17,7 +17,7 @@ int random_int(int lower, int upper) {
 Path clone_path(Path source){
   Path clone = source; 
   clone.tour = (int*) malloc(sizeof(int)*source.size); 
-  for(int i=0; i < best_sol.size; i+=1){ 
+  for(int i=0; i < clone.size; i+=1){ 
     clone.tour[i] = source.tour[i]; 
   } 
   return clone; 
