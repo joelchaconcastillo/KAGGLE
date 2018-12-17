@@ -1,14 +1,22 @@
-all: out evaluador 2optls nn2nodes
+FLAGS= -lm -O3
 
-nn2nodes: 
-	gcc -lm progs/nn-to-nodes.c  lib/*.c -o bin/nn-to-nodes
+all: bin out evaluador 2optls nn2nodes nnpath
 
-evaluador: 
-	gcc -lm progs/eval-sol.c  lib/*.c -o bin/eval-sol  
+nn2nodes: progs/nn-to-nodes.c lib/*.c 
+	gcc $(FLAGS) -lm progs/nn-to-nodes.c  lib/*.c -o bin/nn-to-nodes
 
-2optls:
-	gcc -lm progs/2-opt-ls.c  lib/*.c -o bin/2opt-ls
+evaluador: progs/eval-sol.c lib/*.c 
+	gcc  $(FLAGS) progs/eval-sol.c  lib/*.c -o bin/eval-sol  
+
+2optls: progs/2-opt-ls.c lib/*.c 
+	gcc $(FLAGS) progs/2-opt-ls.c  lib/*.c -o bin/2opt-ls
+
+nnpath: progs/nn-path.c lib/*.c 
+	gcc $(FLAGS) progs/nn-path.c lib/*.c -o bin/nn-path
 
 out: 
 	mkdir -p out 
 
+
+bin: 
+	mkdir -p bin 

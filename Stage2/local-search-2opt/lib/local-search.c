@@ -11,7 +11,6 @@ void free_idsmatrix(IdsMatrix mat){
   } 
 } 
 
-
 Neighborhood create_neighborhood(Inst inst){ 
   Neighborhood neigh;
 
@@ -37,45 +36,46 @@ void free_neighborhood(Neighborhood ng){
 
 Path two_opt_local_search(Inst inst,Path init_sol){ 
 
+  // Medición del tiempo 
+  time_t tic = time(0);
+  time_t toc = tic; 
+
   Neighborhood ng = create_neighborhood(inst);
- 
-  Path best_sol = init_sol; 
-  double best_fit = eval_path(init_sol,inst); 
-  best_sol.tour = (int*) malloc(sizeof(int)*init_sol.size);
-  for(int i=0; i < best_sol.size; i += 1) { 
-    best_sol.tour[i] = init_sol.tour[i];  
-  }
 
-  Path path = init_sol; 
-  path.tour = (int*) malloc(sizeof(int)*init_sol.size); 
-  for(int i=0; i < path.size; i += 1){ 
-    path.tour[i] = init_sol.tour[i]; 
-  } 
+  Path best_sol = clone_path(init_sol); 
+  double best_fit = eval_path(best_sol,inst); 
+
+  Path path = clone_path(init_sol); 
   
-  long cnt = 0; 
+  long long it = 0; 
+  fprintf(stderr,"t: %ld :: it: %ld :: dif: %lf :: fit: %lf \n",
+    (toc-tic),it,0.0,best_fit);
   while(next_two_opt_neighbor(path,&ng)){ 
-    cnt += 1; 
-    printf("%d\r", cnt); 
+    it += 1; 
 
-    // Realizar el movimiento 
     two_opt_move(path,ng); 
 
-    // Evaluar la nueva solución
     double fit = eval_path(path,inst); 
 
-    // Si mejora 
     if(fit <  best_fit) { 
-      cnt = 0; 
-      printf("Mejora old: %lf -> new: %lf\n",best_fit,fit);
+      toc = time(0); 
+      fprintf(stderr,"t: %ld :: it: %ld :: dif: %lf :: fit: %lf \n",
+        (toc-tic),it,best_fit - fit,fit);
+
+      it = 0; 
       best_fit = fit; 
-      for(int i=0; i < best_sol.size; i += 1){ 
-        best_sol.tour[i] = path.tour[i]; 
-      } 
+      path_copy(path,best_sol); 
+
+      reset_neighborhood(&ng); 
     }else{ 
       // Reconstruir la solución original
       two_opt_move(path,ng); 
     }
   } 
+
+  toc = time(0); 
+  fprintf(stderr,"t: %ld :: it: %ld :: dif: %lf :: fit: %lf \n",
+    (toc-tic),it,0.0,best_fit);
 
   free_path(path); 
   free_neighborhood(ng); 
@@ -88,6 +88,7 @@ void two_opt_move(Path path, Neighborhood ng){
 
     int mid =  ng.a_pos + (ng.b_pos - ng.a_pos) / 2 ; 
     int end = ng.b_pos; 
+
     // Invertir el segmento 
     for(int p = ng.a_pos ; p < mid ; p += 1){ 
       int aux = path.tour[p]; 
@@ -104,7 +105,6 @@ bool next_two_opt_neighbor(const Path path, Neighborhood * ng){
 
   // Elegir una posición del recorrido de forma aleatoria 
   if (ng[0].b_index >= ng[0].nearest.cols){
-    /* puts("Reiniciando"); */ 
     // Reinicio el contador de las ciudades cercanas 
     ng[0].b_index = 0; 
 
@@ -156,18 +156,12 @@ void reset_neighborhood(Neighborhood * ng) {
   ng[0].b_index = 0; 
 } 
 
-
-int random_int(int lower, int upper) { 
-  return ( rand() % (upper - lower + 1)) + lower;
-} 
-
 IdsMatrix load_nearest_cities(Inst inst){ 
 
   // Obtenemos la cantidad de ciudades que hay en cada archivo 
-  FILE *file = fopen("out/nearest-to-0","r"); 
+  FILE *file = fopen("near-cities/nearest-to-0","r"); 
   char trash[100]; 
-  int near_cities_cnt = 0; 
-  while(fscanf(file,"%s\n",trash) == 1){near_cities_cnt += 1; } 
+  int near_cities_cnt = get_lines_num("near-cities/nearest-to-0"); 
   
   IdsMatrix nearest_cities; 
   nearest_cities.rows = inst.size; 
@@ -179,7 +173,7 @@ IdsMatrix load_nearest_cities(Inst inst){
 
   for(int id=0; id < inst.size; id+=1){ 
     nearest_cities.ids[id] = (int*) malloc(sizeof(int*)*nearest_cities.cols); 
-    sprintf(filename,"out/nearest-to-%d",id); 
+    sprintf(filename,"near-cities/nearest-to-%d",id); 
     file = fopen(filename,"r"); 
     for(int nc=0; nc < near_cities_cnt; nc += 1){ 
       fscanf(file,"%d\n",&(nearest_cities.ids[id][nc])); 

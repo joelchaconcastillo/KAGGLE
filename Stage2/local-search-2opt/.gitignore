@@ -1,4 +1,8 @@
 out/*
 *.out 
 bin
-
+*.tour*
+*.tsk
+*.hst
+*.sol
+near-cities/*

@@ -25,7 +25,6 @@ int main(int argc, char **argv){
   char *inst_filename = argv[1]; 
   Inst inst = load_inst(inst_filename); 
   
-
   // Cargar el recorrido 
   char *path_filename   = argv[2]; 
   Path path = load_path(path_filename); 
