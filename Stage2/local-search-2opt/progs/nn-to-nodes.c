@@ -1,4 +1,8 @@
 #include "../lib/tsp-santa-evaluation.h" 
+#include <unistd.h> 
+#include <sys/types.h> 
+#include <sys/wait.h> 
+
 
 typedef struct{
   int id; 
@@ -47,42 +51,84 @@ int main(int argc, char **argv) {
     dir = argv[3]; 
   } 
 
-  tuple nearest[cnt]; 
-  for(int i=0; i < cnt; i+= 1){
-    nearest[i].value = 1/0.0; 
-  } 
+  // Obtener el número de núcleos y calcular la repartición de las ciudades 
+  long cpu_cores      = sysconf(_SC_NPROCESSORS_ONLN);
+  int  tasks_per_core = inst.size / cpu_cores;
+  int  * start        = int * malloc(sizeof(int) * cpu_cores);
+  int  * end          = int * malloc(sizeof(int) * cpu_cores);
 
-  // Por cada ciudad encontrar las 'n' ciudades más cercanas
-  /* tuple * sorted = (tuple*) malloc(sizeof(tuple)*inst.size); */ 
-  for(int from=0; from < inst.size; from += 1){ 
-    if( from % 1000)
-    fprintf(stdout,"\r%lf%",((double)from/inst.size)*100);  
-    fflush(stdout);
+  for(int core = 0; core < cpu_cores; core += 1){ 
+    start[core] = (core*tasks_per_core); 
+    end[cpu_cores-1 - core] = inst.size - 1 - start[core]; 
+  }
+  end[cpu_cores] = inst.size; 
 
-    // Calcular la distancia para cada ciudad 
-    for(int to=0; to < inst.size; to += 1) { 
-      if(to == from){continue;} 
-      tuple candidate; 
-      candidate.id = to; 
-      candidate.value = euc_dist(inst.cities[from],inst.cities[to]); 
 
-      if(nearest[cnt-1].value > candidate.value){ 
-        nearest[cnt-1] = candidate ;
-        qsort(nearest,cnt,sizeof(tuple),cmp_fun); 
+
+  // Generamos los procesos 
+  int   id  = -1;
+  pid_t pid = 0;
+  for(int core = 0 ; core < cpu_cores; core+=1) {
+    pid = fork(); 
+    if (pid == 0){ 
+      id = core; 
+      break; 
+    }  
+  }
+ 
+  if(pid != 0 ){ 
+    // El nodo padre debe esperar a los hijos. 
+    pid_t wpid; 
+    int status; 
+    while(wpid = wait(&status) > 0){ 
+      sleep(0); 
+    } 
+  }else{ 
+    
+    // Cada proceso hijo se encarga de procesar 'tasks_per_nodes' ciudades
+    
+    tuple nearest[cnt]; 
+    for(int from=start[id]; from < end[id]; from += 1){ 
+
+      // Log del progreso de cada nodo 
+      if ((from % 100) == 0){ 
+        fprintf(stderr,"nodo: %ld => %lf %\n",id,((double)(from - start[id])/(end[id] - start[id]))); 
+        fflush(stderr); 
       } 
+
+      // Reiniciar el vector de distancias
+      for(int i=0; i < cnt; i+= 1){
+        nearest[i].value = 1/0.0; 
+      } 
+
+      // Calcular la distancia para cada ciudad
+      for(int to=0; to < inst.size; to += 1) { 
+      
+        if(to == from){continue;} 
+        tuple candidate; 
+        candidate.id = to; 
+        candidate.value = euc_dist(inst.cities[from],inst.cities[to]); 
+        
+        if(nearest[cnt-1].value > candidate.value){ 
+          nearest[cnt-1] = candidate ;
+          qsort(nearest,cnt,sizeof(tuple),cmp_fun); 
+        } 
+      } 
+       
+      // Escribir a un archivo las 'cnt' ciudades más cercanas 
+      char filename[100];
+      sprintf(filename,"%s/nearest-to-%d",dir,from); 
+      FILE *file = fopen(filename,"w+"); 
+      for(int to=0; to < cnt; to += 1){ 
+        fprintf(file,"%d\n",nearest[to].id);
+      } 
+      fclose(file);
     } 
-     
-    // Escribir a un archivo las 'cnt' ciudades más cercanas 
-    char filename[100];
-    sprintf(filename,"%s/nearest-to-%d",dir,from); 
-    FILE *file = fopen(filename,"w+"); 
-    for(int to=0; to < cnt; to += 1){ 
-      fprintf(file,"%d\n",nearest[to]);
-    } 
-    fclose(file);
-  } 
+  }
 
   // Housekeeping 
   free_inst(inst); 
+  free(start); 
+  free(end); 
   return 0; 
 } 
