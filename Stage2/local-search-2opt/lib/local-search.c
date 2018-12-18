@@ -11,25 +11,45 @@ void free_idsmatrix(IdsMatrix mat){
   } 
 } 
 
-Neighborhood create_neighborhood(Inst inst){ 
+Neighborhood create_neighborhood(Inst inst,Path init_sol){ 
   Neighborhood neigh;
 
   // Obtener el conjunto de ciudades cercanas a cada ciudad  
   neigh.nearest = load_nearest_cities(inst); 
+  neigh.path = clone_path(init_sol); 
+
+  // Obtener la posición de cada ciudad en el recorrido 
+  neigh.city_pos = (int*) malloc(sizeof(int)*inst.size); 
+  for(int i=0; i < inst.size; i+= 1){ 
+    neigh.city_pos[neigh.path.tour[i]] = i; 
+  } 
 
   reset_neighborhood(&neigh); 
 
+  // Vector para elegir los candidatos 
   neigh.indexes = (int*) malloc(sizeof(int)*inst.size); 
   for(int i=0; i < inst.size; i += 1){
     neigh.indexes[i] = i; 
   }
+
   return neigh; 
+} 
+
+void reset_neighborhood(Neighborhood * ng) { 
+  ng[0].a_index = 1 ; 
+  ng[0].b_index = 0 ;
+  ng[0].restarted = true; 
 } 
 
 void free_neighborhood(Neighborhood ng){ 
   if(ng.indexes != NULL){ 
     free(ng.indexes); 
   }
+
+  if (ng.city_pos != NULL){ 
+    free(ng.city_pos); 
+  } 
+
   free_idsmatrix(ng.nearest); 
 } 
 
@@ -39,9 +59,9 @@ Path two_opt_local_search(Inst inst,Path init_sol){
   // Medición del tiempo 
   time_t tic = time(0);
   time_t toc = tic; 
-
-  Neighborhood ng = create_neighborhood(inst);
-
+  
+  Neighborhood ng = create_neighborhood(inst,init_sol);
+  
   Path best_sol = clone_path(init_sol); 
   double best_fit = eval_path(best_sol,inst); 
 
@@ -50,12 +70,9 @@ Path two_opt_local_search(Inst inst,Path init_sol){
   long long it = 0; 
   fprintf(stderr,"t: %ld :: it: %ld :: dif: %lf :: fit: %lf \n",
     (toc-tic),it,0.0,best_fit);
-  while(next_two_opt_neighbor(path,&ng)){ 
+  while(next_two_opt_neighbor(&ng)){ 
     it += 1; 
-
-    two_opt_move(path,ng); 
-
-    double fit = eval_path(path,inst); 
+    double fit = eval_path(ng.path,inst); 
 
     if(fit <  best_fit) { 
       toc = time(0); 
@@ -64,13 +81,11 @@ Path two_opt_local_search(Inst inst,Path init_sol){
 
       it = 0; 
       best_fit = fit; 
-      path_copy(path,best_sol); 
+      path_copy(ng.path,best_sol); 
 
       reset_neighborhood(&ng); 
-    }else{ 
-      // Reconstruir la solución original
-      two_opt_move(path,ng); 
     }
+    sleep(0);
   } 
 
   toc = time(0); 
@@ -84,27 +99,45 @@ Path two_opt_local_search(Inst inst,Path init_sol){
 } 
 
 
-void two_opt_move(Path path, Neighborhood ng){ 
+void two_opt_move(Neighborhood * ng){ 
 
-    int mid =  ng.a_pos + (ng.b_pos - ng.a_pos) / 2 ; 
-    int end = ng.b_pos; 
+    int mid =  ng[0].a_pos + (ng[0].b_pos - ng[0].a_pos) / 2 ; 
+    int end = ng[0].b_pos; 
 
-    // Invertir el segmento 
-    for(int p = ng.a_pos ; p < mid ; p += 1){ 
-      int aux = path.tour[p]; 
-      path.tour[p] = path.tour[end]; 
-      path.tour[end] = aux;  
+    // Invertir el segmento [ a ... b ] del recorrido   
+    for(int p = ng[0].a_pos ; p < mid ; p += 1){ 
+
+      // Invertir el recorrido 
+      int aux = ng[0].path.tour[p]; 
+      ng[0].path.tour[p] = ng[0].path.tour[end]; 
+      ng[0].path.tour[end] = aux;  
+
+      // Actualizar los índices de posición 
+      ng[0].city_pos[ng[0].path.tour[end]] = end;
+      ng[0].city_pos[ng[0].path.tour[p]] = p; 
+
+      // Reducir el intervalo por la derecha
       end -= 1; 
     } 
 } 
 
-bool next_two_opt_neighbor(const Path path, Neighborhood * ng){ 
-  if (ng[0].a_index + 1 >= ng[0].nearest.rows){
-      return false;  
-  }
+bool next_two_opt_neighbor(Neighborhood * ng){ 
 
-  // Elegir una posición del recorrido de forma aleatoria 
+  // Si se ha reiniciado la vecindad no se deshace el movimiento 2opt 
+  // de lo contrario significa que aún se esta explorando y debe regresarse a 
+  // la solución anterior. 
+  if( ng[0].restarted ) { ng[0].restarted = false; }
+  else{ two_opt_move(ng); } 
+
+
+  // Si se ha terminado de visitar la vecindad se regresa la bandera de paro
+  if (ng[0].a_index + 1 >= ng[0].nearest.rows){ return false;  }
+
+
+  // Si se ha terminado de explorar las ciudades vecinas de la posición 
+  // a_index se procede a elegir un nuevo candidato
   if (ng[0].b_index >= ng[0].nearest.cols){
+
     // Reinicio el contador de las ciudades cercanas 
     ng[0].b_index = 0; 
 
@@ -112,49 +145,47 @@ bool next_two_opt_neighbor(const Path path, Neighborhood * ng){
     ng[0].a_index += 1; 
 
     int index = random_int(ng[0].a_index,ng[0].nearest.rows-1); 
-    
+   
+    // Intercambiar las posiciones del recorrido candidatas 
     int aux = ng[0].indexes[ng[0].a_index]; 
     ng[0].indexes[ng[0].a_index] = ng[0].indexes[index];
     ng[0].indexes[index] = aux; 
   } 
 
-
+  // Obtener la posición candidata y la etiqueta de la ciudad 
   ng[0].a_pos = ng[0].indexes[ng[0].a_index];
-  int a_id  = path.tour[ng[0].a_pos]; 
+  int a_id  = ng[0].path.tour[ng[0].a_pos]; 
   
    
   // Elegir de forma aleatoria una ciudad de su vecindad
-
   int index = random_int(ng[0].b_index,ng[0].nearest.cols-1); 
+
+  // Intercambiar las ciudades más cercanas para eliminarlas de la 
+  // vecindad
   int aux = ng[0].nearest.ids[a_id][index]; 
   ng[0].nearest.ids[a_id][index] = ng[0].nearest.ids[a_id][ng[0].b_index]; 
   ng[0].nearest.ids[a_id][ng[0].b_index] = aux; 
 
+  // Obtener la posición en el recorrido de la etiqueta
   int b_id = ng[0].nearest.ids[a_id][ng[0].b_index]; 
+  ng[0].b_pos = ng[0].city_pos[b_id]; 
+  
+  // Incrementar el contador de la posición en las ciudades más cercanas
   ng[0].b_index += 1;
-
-  // Obtener la posición en el recorrido 
-  for(int pos = 0; pos < path.size; pos += 1){ 
-    if (b_id == path.tour[pos]){ 
-      ng[0].b_pos = pos; 
-      break; 
-    } 
-  }
 
   // las posiciones deben ser menor a mayor  
   if(ng[0].a_pos > ng[0].b_pos) { 
     int aux = ng[0].a_pos; 
     ng[0].a_pos = ng[0].b_pos; 
     ng[0].b_pos = aux; 
-  } 
+  }
+
+  // Se realiza el movimiento 2-opt 
+  two_opt_move(ng); 
 
   return true; 
 } 
 
-void reset_neighborhood(Neighborhood * ng) { 
-  ng[0].a_index = 1 ; 
-  ng[0].b_index = 0; 
-} 
 
 IdsMatrix load_nearest_cities(Inst inst){ 
 

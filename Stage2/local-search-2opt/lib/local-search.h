@@ -10,16 +10,16 @@ typedef struct{
   int cols; 
   int ** ids;
 } IdsMatrix; 
-
 void free_idsmatrix(IdsMatrix mat); 
-
-
 
 typedef struct{
   int a_pos; 
   int b_pos; 
   int a_index; 
   int b_index; 
+  bool restarted; 
+  Path path; 
+  int * city_pos; 
   IdsMatrix nearest; 
   int * indexes; 
 }Neighborhood; 
@@ -30,10 +30,10 @@ void free_neighborhood(Neighborhood ng);
 IdsMatrix load_nearest_cities(Inst inst);
 
 // Inicializa la vecindad 
-Neighborhood create_neighborhood(Inst inst);
+Neighborhood create_neighborhood(Inst inst,Path init_sol);
 
 // Actualiza la vecindad al siguiente vecino 
-bool next_two_opt_neighbor(const Path path, Neighborhood * ng); 
+bool next_two_opt_neighbor(Neighborhood * ng); 
 
 // Reinicia la vecindad
 void reset_neighborhood(Neighborhood * ng); 
@@ -42,7 +42,7 @@ void reset_neighborhood(Neighborhood * ng);
 Path two_opt_local_search(Inst inst, Path init_sol); 
 
 // Invierte el segmento 
-void two_opt_move(Path path,Neighborhood ng);
+void two_opt_move(Neighborhood * ng);
 
 
 
