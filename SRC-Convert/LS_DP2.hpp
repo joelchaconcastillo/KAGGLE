@@ -1,13 +1,9 @@
-#ifndef _INCL_DP_LS
-#define _INCL_DP_LS
+#ifndef _INCL_DP_LS2
+#define _INCL_DP_LS2
 ///LS variables..
-double mn = 1e15;
-
-double dp[1001000][24];
-int bestIdx[1001000][24];
 
 
-bool solve(int start, int len){
+bool solve2(int start, int len){
     //double ss = evaluate();
     int n = NCITIES;
     int curCities[len], position[len];
@@ -59,16 +55,21 @@ bool solve(int start, int len){
 
     double tt = evaluate(nPath);
     mn = min(mn, tt);
+    if(curValue > dp[((1 << (len - 1))) - 1][len - 1]) return true;
+    else
+    {
+       for(int i = 0; i < len; i++) nPath[i] = path[(start + i)%n];
+return false;
+    }
  //  fprintf(stderr, "pivot %d\n", start);	
     //printf("%lf\n", mn);
     //printf("*%lf\n", ss - tt);
 
     //printf("%lf\n", curValue - dp[((1 << (len - 1))) - 1][len - 1]);
-    return curValue > dp[((1 << (len - 1))) - 1][len - 1];
 }
 
 
-void localSearch(){
+void localSearch2(){
     int n = NCITIES;
     int permutation[n];
     for(int i = 0; i < n; i++){
@@ -83,9 +84,11 @@ void localSearch(){
             if(solve(permutation[i], len)){
 		
                 p = true;
-		printf("pivot %d %f\n", i, evaluate(nPath));
+		i = abs((i-len)%n);
     		saveNewSolution();
+		
             }
+		printf("pivot %d %f\n", i, evaluate(nPath));
         }
         //if(!p) break;
 	break;

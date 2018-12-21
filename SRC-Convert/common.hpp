@@ -11,21 +11,71 @@ char currentDirectory[1000];
 char filename_newSolution[100];
 char filename_oldSolution[100];
 char filename_instance[100];
+double minx=MAX, miny=MAX, maxx=-MAX,maxy=-MAX, minknn=MAX, maxknn=-MAX;
 city cities[MAX];
-int path[MAX], nPath[MAX], path_segment[MAX];
+int path[MAX], nPath[MAX], path_segment[MAX], indexnPath[MAX];
+vector<int> primeIds;
 bitset<MAX> used;
+int K = 1;
 int l, r, len;
 long long INF = 1e6, currentCost;
 int L = 10;
-double C = 100;
+double C = INF;
 int seed = 0;
 vector<vector<long long> > distances;
 bitset<1001000> isPrime;
 long long sieve_size;
+void Kneares(int k, int index, int *nindex)
+{
+	char filecity[1000];
+	sprintf(filecity,"/tmp/NNearest_files/%d.txt",index);
+        FILE * file = fopen(filecity, "r");
+	double distance;
+	int indexc;
+	int cont = 0;
+	while(cont < k)	
+	{
+	   fscanf(file, "%lf %d\n", &distance, &indexc);
+	   if( (indexnPath[indexc] +1) %10==0)
+	   {
+		nindex[cont] = indexnPath[indexc];
+		cont++;
+	   }
+	}
 
+        fclose(file);
+
+}
+double getKNearestdistance(int k, int index)
+{
+	char filecity[1000];
+	sprintf(filecity,"../Basics/NNearest_files/%d.txt",index);
+       FILE * file = fopen(filecity, "r");
+	double distance;
+	double totaldistance = 0.0;
+//	double maxdistance =  sqrt((maxx-minx)*(maxx-minx) + (maxy-miny)*(maxy-miny));
+	int indexc;
+
+	fscanf(file, "%lf %d\n", &distance, &indexc);
+	while(!isPrime[indexc])	
+	{
+	   fscanf(file, "%lf %d\n", &distance, &indexc);
+	}
+	totaldistance = distance;
+	
+//	for(int i = 0; i < k; i++)
+//	{
+//	   fscanf(file, "%lf %d\n", &distance, &indexc);
+//	   totaldistance += distance;//(distance/maxdistance);
+//	   
+//	}
+//	totaldistance /=((double)k);
+        fclose(file);
+        return totaldistance;
+}
 void readInstance(){
     FILE *file = fopen(filename_instance, "r");
-    int N = NCITIES;//n = 197769;
+    int N = NCITIES+1;//n = 197769;
     double x, y;
     int id;
     char trash[100];
@@ -35,6 +85,16 @@ void readInstance(){
         cities[id].id = id;
         cities[id].x = x;
         cities[id].y = y;
+	minx = min(minx, x);
+	maxx = max(maxx, x);
+	miny = min(miny, y);
+	maxy = min(miny, y);
+	if( isPrime[id]) 
+	{
+		primeIds.pb(id);
+	}
+	
+
         //cities[id].x = round(x); //KHL only can recieve a matrix-integers only..
         //cities[id].y = round(y);
     }
@@ -45,13 +105,17 @@ void readSolution(){
     FILE *file = fopen(filename_oldSolution, "r");
     char trash[100];
     fscanf(file, " %s\n", trash);
-    for(int i = 0; i < NCITIES; i++) fscanf(file, "%d\n", path + i);
+    for(int i = 0; i < NCITIES; i++){
+	 fscanf(file, "%d\n", path + i);
+	 indexnPath[path[i]] = i;
+	}
     fclose(file);
 }
 void sieve(long long upperbound){
     sieve_size = upperbound + 1;
     isPrime.set();
     isPrime[0] = isPrime[1] = false;
+	
     for(long long i = 2; i < sieve_size; i++) if(isPrime[i]){
         for(long long j = i*i; j < sieve_size; j += i) isPrime[j] = false;
     }
@@ -62,6 +126,27 @@ double distd(int pos, int c1, int c2){
     if(pos%L == 0){
         if(isPrime[c1]) return d;
         else return 1.1*d;
+    }
+    else return d;
+}
+double distdknn(int pos, int c1, int c2, double distance1, double distance2){
+	double dx = (cities[c1].x - cities[c2].x);///(maxx-minx);
+	double dy = (cities[c1].y - cities[c2].y);///(maxy-miny);
+	double dknn = (distance1 - distance2);///(maxknn - minknn);
+    double d = sqrt( dx*dx+ dy*dy + dknn*dknn );
+    pos++; // Esta es la parte que agregue
+    if(pos%L == 0){
+        if(isPrime[c1]) return d;
+        else return 1.1*d;
+    }
+    else return d;
+}
+double distmodified(int pos, int c1, int c2){
+    double d = (sqrt((cities[c1].x - cities[c2].x)*(cities[c1].x - cities[c2].x) + (cities[c1].y - cities[c2].y)*(cities[c1].y - cities[c2].y)));
+    pos++; // Esta es la parte que agregue
+    if(pos%L == 0){
+        if(isPrime[c1]) return d;
+        else return 10.1*d;
     }
     else return d;
 }
@@ -77,6 +162,7 @@ long long distl(int pos, int c1, int c2){
 double distdtsp(int pos, int c1, int c2){
     return (sqrt((cities[c1].x - cities[c2].x)*(cities[c1].x - cities[c2].x) + (cities[c1].y - cities[c2].y)*(cities[c1].y - cities[c2].y)));
 }
+
 void constructMatrix(){
 	currentCost = 0; // check the currentCost and check if the KHL is working...
 	for (int i = l-1; i <= r; i++){
@@ -150,6 +236,22 @@ void readNewSolution(char *fileSolution){
     }
     fclose(file);
 }
+void generateStartPath(char *filename)
+{
+  //  char fileSolution[1010];
+  //  strcpy(fileSolution, (*argv)[5]);
+  //  FILE * file = fopen(fileSolution, "w");
+    FILE * file = fopen(filename, "w");
+	fprintf(file, "NAME : kagglesanta2018.1502730768.tour\nCOMMENT : Length = 1502730768\nCOMMENT : Found by LKH [Keld Helsgaun] Fri Dec 14 10:51:59 2018\nTYPE : TOUR\nDIMENSION : %d\nTOUR_SECTION\n", (len)*L+2);
+
+    for(int i = 0; i < len*L; i++)
+ 	{
+	   fprintf(file, "%d\n", i+1);
+	}
+    fprintf(file, "%d\n", len*L+1);
+    fprintf(file, "%d\n", len*L+2);
+    fclose(file);
+}
 void transformPath(){
     for(int i = 0; i < NCITIES; i++) nPath[i] = path[i]; //copy path 
     int n = (r-l+1)*L+2;
@@ -165,7 +267,7 @@ void transformPath(){
     while(path_segment[i] != n){
         if(!used[path_segment[i]]){
             used[path_segment[i]] = true;
-            nPath[nlen++] = (path_segment[i]+l)%NCITIES;
+            nPath[(l + nlen++)%NCITIES] = path[(path_segment[i]+l)%NCITIES];
         }
         i = (i + 1)%n;
     }
@@ -174,7 +276,7 @@ void transformPath(){
 void modifySolution(){
 //    vector<int> p;
 //    for(int i = l; i <= r; i++) p.pb(path[i]);
-    for(int i = l,k = 0; i <= r; i++, k++) path[i] = nPath[k];// p[k];//nPath[k];// p[nPath[k]];
+    //for(int i = l,k = 0; i <= r; i++, k++) nPath[i] = path[k];// p[k];//nPath[k];// p[nPath[k]];
 }
 void saveNewSolution()
 {
@@ -182,17 +284,19 @@ void saveNewSolution()
   //  strcpy(fileSolution, (*argv)[5]);
   //  FILE * file = fopen(fileSolution, "w");
     FILE * file = fopen(filename_newSolution, "w");
+	fprintf(file, "Path\n");
     for(int i = 0; i < NCITIES; i++) fprintf(file, "%d\n", nPath[i]);
     fclose(file);
 }
 
 double evaluate(int *pathc){
     double len = 0.0;
-    for(int i = 0; i < NCITIES; i++){
-        int j = (i + 1)%NCITIES;
+    for(int i = 0; i <= NCITIES; i++){
+        int j = (i + 1);//%NCITIES;
         len += distd(i, pathc[i], pathc[j]);
     }
     return len;
 }
+void swap(int *lpath, int a, int b){ int tmp = lpath[a]; lpath[a] = lpath[b]; lpath[b] = tmp;  }
 
 #endif

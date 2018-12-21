@@ -26,12 +26,16 @@ using namespace std;
 #define pii pair<int, int>
 #define NCITIES 197769
 #define DP 100
-#define LKH_REPLACEMENT 101
-#define LKH3 102
+#define DP2 101
+#define LKH_REPLACEMENT 102
+#define LKH3 103
+#define DP3 104
 #include "common.hpp"
 #include "LKH_Replacement.hpp"
 #include "LKH3.hpp"
 #include "LS_DP.hpp"
+#include "LS_DP2.hpp"
+#include "LS_DP3.hpp"
 void readParams(int *argc, char ***argv)
 {
     strcpy(filename_instance, (*argv)[1]);
@@ -54,11 +58,17 @@ int main(int argc, char **argv){
     strcpy(currentDirectory, "/home/joel.chacon/KAGGLE/git/KAGGLE/SRC-Convert");
     //int IMPROVEMENT = LKH3;//LKH_REPLACEMENT;
 
-     int IMPROVEMENT = DP;// LKH_REPLACEMENT;
+     int IMPROVEMENT = DP3;// LKH_REPLACEMENT;
     switch(IMPROVEMENT)
     {
        case DP:
          localSearch();
+       break;
+       case DP2:
+         localSearch2();
+       break;
+       case DP3:
+         localSearch3();
        break;
        case LKH_REPLACEMENT:
 	LKH_Replacement();
