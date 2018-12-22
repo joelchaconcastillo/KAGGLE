@@ -9,7 +9,6 @@
 void PrintHelp()
 {
 	cout << "Instructions:"<<endl;
-	cout << "--Instance NAMEINSTANCE (WFG1)"<<endl;
 	cout << "--Seed (299)" <<endl;
 	cout << "--Px (0.9), is the Crossover probability" <<endl;
 	cout << "--Pm (1/n), is the Mutation Probability " << endl;

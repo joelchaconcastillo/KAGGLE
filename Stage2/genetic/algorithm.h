@@ -84,6 +84,7 @@ void GENETIC::init_population() //read the initial paths..
 		nfes++;
 		i++;
 	}
+	if( i < pops) pops = i;
 	child_pop = population;
 }
 void GENETIC::evol_population()
