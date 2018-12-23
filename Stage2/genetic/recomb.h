@@ -4,260 +4,348 @@
 #include "global.h"
 #include "individual.h"
 
- 
 
+// Estructura para ordenar los ids por algún valor
+//
 typedef struct { 
   int id; 
   double val; 
-} erx_tuple; 
+}erx_tuple; 
 
-int cmp_fun(const void *first, const void * second){ 
-  erx_tuple a = ((erx_tuple*)first)[0];  
-  erx_tuple b = ((erx_tuple*)second)[0]; 
+// Función de comparación para usar en qsort 
+//
+int cmp_fun(const void *at, const void *bt){ 
+  erx_tuple a = ((erx_tuple*) at)[0]; 
+  erx_tuple b = ((erx_tuple*) bt)[0]; 
 
   if(a.val == b.val){ return 0; }
   if(a.val < b.val) { return -1;} 
   if(a.val > b.val) { return 1; } 
-}
+} 
 
-typedef struct{
-  int edge[2];
-  int end;
+
+// Lista de ciudades que son parte de una arista con una tercera 
+// ciudad. 
+typedef struct{ 
+  int * edge; 
   int size; 
-}edge_list; 
+  int end; 
+}edge_list;
 
+void free_edge_list(edge_list * list){ 
+  if( list->edge != NULL) {free(list->edge); }
+  list->size = 0; 
+  list->end = 0; 
+} 
+
+// Lista de las aristas de cada ciudad 
+//
 typedef struct{ 
   edge_list * candidate;
-  int end;
-  int size;
-}candidate_list; 
+  int size; 
+  int end; 
+}city_edges; 
 
-void free_candidate_list(candidate_list * list){ 
-  if(list[0].candidate != NULL){ 
-    free(list[0].candidate); 
-  } 
-  list[0].end = 0; 
-  list[0].size = 0; 
+void free_city_edges(city_edges * list){ 
+  if( list->candidate != NULL){ free_edge_list(list->candidate) ; } 
+  list->size = 0; 
+  list->end = 0; 
 } 
 
-
-void init_candidate_list(candidate_list * list){ 
-  list[0].candidate = (edge_list *) malloc(sizeof(edge_list)*(NCITIES)); 
-  for(int i=0; i < NCITIES ; i += 1){ 
-    for (int j=0; j < 2 ; j += 1){ 
-      list[0].candidate[i].edge[j] = -1; 
+// -------------------------------------------------------------------
+// IO
+// -------------------------------------------------------------------
+void print_city_edges(city_edges  list){ 
+  fprintf(stdout,"p_list = ["); 
+  for(int i=0; i < 5; i+=1){ 
+    for(int j=0; j < 2; j+=1){ 
+      fprintf(stdout," %d, ",list.candidate[i].edge[j]); 
     } 
-    list[0].candidate[i].size = 0;
-    list[0].candidate[i].end = 0; 
+    fprintf(stdout,",\n"); 
   } 
-  list[0].size = NCITIES-1;
-} 
+  fprintf(stdout,"]\n"); 
+}
 
-void get_edge_list(const int * tour, candidate_list * list){ 
-  fprintf(stdout,"get_edge_list\n");
-  fflush(stdout);
-   
-  for(int i=0; i < NCITIES ; i+= 1) { 
-    int pos = list[0].candidate[i].size ;
-    list[0].candidate[i].edge[pos] = tour[i+1]; 
-    list[0].candidate[i].size = pos + 1; 
-  } 
-} 
+// --------------------------------------------------------------------
+// Funciones
+// --------------------------------------------------------------------
 
-bool includes(edge_list * list, int edge){ 
 
-  for(int i=0; i < list[0].size; i += 1){ 
-    if (list[0].edge[i] == edge){ 
-      return true; 
+// Inicializar la lista de aristas para cada ciudad 
+//
+void init_city_edges(city_edges * list){ 
+  list->candidate = (edge_list *) malloc(sizeof(edge_list)*NCITIES); 
+
+  for(int i=0; i < NCITIES; i += 1){ 
+    list->candidate[i].edge = (int *) malloc(sizeof(int)*2); 
+    for(int j=0; j < 2; j += 1){ 
+      list->candidate[i].edge[j] = 0; 
     } 
-  } 
+    list->candidate[i].size = 0; 
+    list->candidate[i].end = 0; 
+  }
 
+  list->size = NCITIES-1; 
+  list->end = NCITIES-1;
+} 
+
+// Obtener las aristas presentes en los recorridos 
+// en la recombinación de aristas se considera 0 ... a - x - b ... 0 las
+// aristas en ambas direcciones, pero cuando no es simétrico consideré es 
+// demasiado destructivo y solo se considera 0 .. x - b .. 0. 
+//
+void get_edge_list(int * path, city_edges * list){ 
+  for(int i=0; i < NCITIES; i+=1){ 
+    int pos = list->candidate[path[i]].size; 
+    list->candidate[path[i]].edge[pos] = path[i+1]; 
+    list->candidate[path[i]].size += 1; 
+  }
+}
+
+
+// Revisa si la arista 'edge' se encuentra en la lista 'list
+//
+// Regresa true, si se encuentra  y false en caso contrario.
+//
+bool includes(edge_list list, int edge){ 
+  for(int i=0; i < list.size; i += 1){ 
+    if (list.edge[i] == edge){ return true;} 
+  } 
   return false; 
 } 
 
 
-bool push_edge(int edge, edge_list * list){ 
-  bool push = true; 
-  for(int i=0; i < list[0].size; i+= 1){ 
-    if(!includes(list,edge)){ 
-      push = false;  
-    } 
-  }
-  
-  if(push){ 
-    list[0].edge[list[0].size] = edge; 
-    list[0].size += 1; 
-  }
+// Se agrega la arista 'edge' en la lista de aristas 'list' solo si no es  
+// un duplicado 
+// 
+// Regresa 'true' si se ha agregado y 'false' en caso contrario. 
+//
+bool push_edge(edge_list * list, int edge){ 
+  bool pushed = true; 
 
-  return push; 
-} 
-
-void merge_candidate_lists(
-    candidate_list * merged  ,
-    candidate_list * a_list,
-    candidate_list * b_list){
-
-  for(int i=0; i < NCITIES; i += 1) { 
-
-    edge_list * merged_candidate = merged[0].candidate + i; 
-    edge_list * a_candidate = a_list[0].candidate + i; 
-    edge_list * b_candidate = b_list[0].candidate + i ; 
-
-    for(int j=0; j < a_candidate[0].size; j+= 1) { 
-      int edge = a_candidate[0].edge[j]; 
-      push_edge(edge,merged_candidate); 
-    } 
-
-    for(int j=0; j < b_candidate[0].size; j+= 1) { 
-      int edge = a_candidate[0].edge[j]; 
-      push_edge(edge,merged_candidate); 
-    } 
-  } 
-
-}
-
-
-bool delete_in_list(int val, int * list, int * size){ 
-  bool deleted = false;  
-  for(int i=0; i < size[0]; i += 1){ 
-    if (list[i] == val){ 
-      list[i] = list[size[0]-1]; 
-      list[size[0]-1] = val; 
-      size[0] -= 1; 
-      deleted = true; 
+  for(int i=0; i < list->size; i+= 1){ 
+    if(includes(*list,edge)){ 
+      pushed = false; 
       break; 
     } 
   } 
-  return deleted; 
+
+  if(pushed){ 
+    list->edge[list->size] = edge; 
+    list->size += 1; 
+  } 
+  return pushed; 
 } 
 
+
+// Combinar las dos listas de aristas de cada ciudad 'p1' y 'p2' en 
+// una tercera lista, que no tendrá soluciones repetidas. Es decir 
+// si p1 contiene a-b y p2 a-c la lista 'neighbor' tendrá a-b,a-c
+// si p1 contiene a-b y p2 a-b la lista 'neighbor' tendrá a-b
+//
+city_edges merge_city_edges_lists(city_edges p1_list, city_edges p2_list){ 
+  city_edges neighbor_list; 
+  init_city_edges(&neighbor_list);  
+
+  for(int i=0; i < NCITIES; i += 1){ 
+    edge_list * a_cand = p1_list.candidate + i; 
+    edge_list * b_cand = p2_list.candidate + i; 
+    edge_list * merge  = neighbor_list.candidate + i; 
+
+    for(int j=0; j < a_cand->size; j+= 1){ 
+      int edge = a_cand->edge[j]; 
+      push_edge(merge,edge); 
+    } 
+    
+    for(int j=0; j < b_cand->size; j+= 1){ 
+      int edge = b_cand->edge[j]; 
+      push_edge(merge,edge); 
+    }
+  } 
+
+  return neighbor_list; 
+} 
+
+
+// Intercambiar los valores en las posiciones 'i' y 'j' del arreglo 'list'
+//
+void swp(int * list, int i, int j){ 
+  int aux = list[i]; 
+  list[i] = list[j];
+  list[j] = aux;
+} 
+
+// Obtener un número entero aleatorio en el rango [lowe,upper] 
+//
 int random_int(int lower, int upper) { 
   return ( rand() % (upper - lower + 1)) + lower;
 } 
 
 
-void erx(candidate_list * neighbor_list ,CIndividual &C){ 
+void erx(city_edges * neighbor_list, CIndividual &C){ 
   
-  fprintf(stdout,"reset pointers\n");
-  fflush(stdout);
-
- 
-  // Reiniciar los punteros de la lista 
-  for(int i=0; i < neighbor_list[0].size; i+=1) {
-    neighbor_list[0].candidate[i].end = neighbor_list[0].candidate[i].size - 1;
+  // Reiniciar los punteros de búsqueda de la lista 
+  for(int i=0; i < neighbor_list->size; i+= 1){ 
+    int end = neighbor_list->candidate[i].size - 1; 
+    neighbor_list->candidate[i].end = end; 
   } 
 
-  fprintf(stdout,"candidates\n");
-  fflush(stdout);
+  // Crear la lista de ciudades candidatas
+  int cities[NCITIES]; 
+  int indexes[NCITIES]; 
+  for(int i=0; i < NCITIES; i+=1){ 
+    cities[i] = i; 
+    indexes[i] = i; 
+  }
+  int c_end = NCITIES-1; 
 
-  // Lista de ciudades candidatas 
-  int candidates[NCITIES]; 
-  for(int i=0; i < NCITIES; i += 1){ candidates[i] = i; } 
-  /* int end = NCITIES-1; */ 
-  int c_ptr = NCITIES-1; 
-  
-  int * new_tour = C.path; 
+  int new_tour[NCITIES+1];
   int t_ptr = 0; 
   int x = 0; 
 
+  /* fprintf(stdout,"start loop\n"); */
+  /* fflush(stdout); */
 
-  /* int sorted_idexes[NCITIES]; */
-  /* int sort_end = NCITIES -1; */
-
-  /* erx_tuple sorting[end]; */ 
-  /* for(int i=0; i < end; i += 1){ */ 
-  /*   sorting[i].id = candidates[i]; */ 
-  /*   sorting[i].val = neighbor_list[0].candidate[candidates[i]].size; */
-  /* } */ 
-  /* qsort(sorting,end,sizeof(erx_tuple),cmp_fun); */
-  /* for(int i=0; i < end; i += 1) { */ 
-    
-  /* } */ 
-
-  fprintf(stdout,"start loop\n");
-  fflush(stdout);
-
-
-  // Loop 
+  // Loop para crear el nuevo recorrido empleando las aristas candidatas de 
   while(true){ 
-   
-    // Agregar la ciudad al recorrido 
+    
+    /* fprintf(stdout,"t_ptr %d\n",t_ptr); */
+   // Agrega la ciudad al recorrido 
     new_tour[t_ptr] = x; 
-    t_ptr += 1; 
-    fprintf(stdout,"stopt criteria %d\n",t_ptr);
-    fflush(stdout);
+    t_ptr += 1;  
 
+    /* fprintf(stdout,"stop criteria %d\n",t_ptr); */
+    /* fflush(stdout); */
+    // Criterio de paro (hemos terminado el recorrido
+    if(t_ptr == NCITIES-1){ 
+      break; 
+    }
+    
+    /* fprintf(stdout,"new_tour = ["); */ 
+    /* for(int i=0; i < 10; i += 1){ */ 
+    /*   fprintf(stdout,"%d,",new_tour[i]); */ 
+    /* } */ 
+    /* fprintf(stdout,"]\n"); */ 
 
-    if(t_ptr == NCITIES-1){ break; } 
+    /* fprintf(stdout,"x %d\n",x); */
+    /* fprintf(stdout,"c_end: %d, posx: %d, c_end:%d city_end: %d\n",x,indexes[x],c_end,cities[c_end]); */
+    /* fprintf(stdout,"NCITIES %d\n",NCITIES); */
 
-    // borrar la ciudad candidata
-    delete_in_list(x,candidates,&c_ptr);
-    for(int i=0; i < NCITIES; i+=1 ){ 
-      edge_list * candidate = &(neighbor_list[0].candidate[i]); 
-      int * list = &(candidate[0].edge[0]); 
-      delete_in_list(x,list,&(candidate[0].end)); 
-    } 
+    // Borrar la ciudad que se ha agregado al recorrido 
+    swp(cities,indexes[x],c_end);
+    indexes[x] = c_end; 
+    indexes[cities[c_end]] = x; 
+    c_end -= 1; 
 
-    if (neighbor_list[0].candidate[x].size == 0) { 
-      x = candidates[random_int(0,c_ptr)];
-    } 
-    else { 
-      
-      int rem_cand = neighbor_list[0].candidate[x].end;
-      erx_tuple sorting[rem_cand]; 
-      for(int i=0; i < rem_cand; i += 1){ 
-        sorting[i].id = neighbor_list[0].candidate[x].edge[i]; 
-        sorting[i].val = neighbor_list[0].candidate[sorting[i].id].end;
+    /* if (t_ptr == 4){ */ 
+    /*   exit(0); */ 
+    /* } */ 
+    /* fprintf(stdout,"here\n"); */
+
+    // Borrar la ciudad de las ciudades candidatas
+    for(int i=0; i < neighbor_list->size; i+= 1){ 
+      edge_list * list = neighbor_list->candidate + i ; 
+      for(int j=0; j < list->end; j += 1){ 
+        if (list->edge[j] == x){ 
+          swp(list->edge,list->end-1,j); 
+          list->end -= 1; 
+          break; 
+        } 
       } 
-     
-      qsort(sorting,rem_cand,sizeof(erx_tuple),cmp_fun);
+    } 
 
-      x = sorting[0].id;
-
+    // Seleccionar de forma aleatoria si no hay mas aristas en la ciudad en
+    // la que estamos. 
+    if (neighbor_list->candidate[x].size == 0){ 
+      x = cities[random_int(0,c_end)]; 
+    }else{ 
+      int rem_cities = neighbor_list->candidate[x].end;
+      erx_tuple sorted[rem_cities]; 
+      /* fprintf(stdout,"rem_cities %d\n",rem_cities); */
+      for(int i=0; i <= rem_cities; i+=1){ 
+        /* fprintf(stdout,"i%d\n",i); */
+        /* fprintf(stdout,"sorted[i].id %d\n",sorted[i]); */
+        sorted[i].id = neighbor_list->candidate[x].edge[i]; 
+        /* fprintf(stdout,"sorted[i].id %d\n",sorted[i]); */
+        sorted[i].val = neighbor_list->candidate[sorted[i].id].end;  
+      }
+      qsort(sorted,rem_cities,sizeof(erx_tuple),cmp_fun); 
+      x = sorted[0].id; 
     } 
   } 
-
   new_tour[NCITIES-1] = 0; 
 
-  fprintf(stdout,"end loop\n");
-  fflush(stdout);
 
-
-
+  // Copiar el recorrido en el hijo 
+  for(int i=0; i < NCITIES+1; i+=1){ 
+    C.path[i] = new_tour[i];  
+  } 
 } 
 
-void xover_kaggle(CIndividual &P1, CIndividual &P2, CIndividual &C1, CIndividual &C2)
-{
 
-  fprintf(stdout,"Xover\n");
-  fflush(stdout);
-  // Generar la lista de candidatos 
-  candidate_list neighbor_list; 
-  init_candidate_list(&neighbor_list); 
+void xover_kaggle(
+  CIndividual &P1, 
+  CIndividual &P2, 
+  CIndividual &C1, 
+  CIndividual &C2) { 
 
-  candidate_list a_list; 
-  init_candidate_list(&a_list);
-  candidate_list b_list; 
-  init_candidate_list(&b_list); 
+  fprintf(stdout,"iniciando la cruza\n"); 
+  fflush(stdout); 
+  time_t tic = time(0); 
 
-
-  // Conseguir las aristas de los recorridos 
-  get_edge_list(P1.path,&a_list); 
-  get_edge_list(P2.path,&b_list);
-
-  // Combinar las aristas 
-  //
-  merge_candidate_lists(&neighbor_list,&a_list,&b_list); 
+  /* fprintf(stdout,"Xover\n"); */ 
  
-  fprintf(stdout,"start crossover\n");
-  fflush(stdout);
+  // Inicializar las listas de aristas
+    city_edges p1_list; 
+  init_city_edges(&p1_list);  
+  city_edges p2_list; 
+  init_city_edges(&p2_list);  
 
-  erx(&neighbor_list,C1);
+  // Extraer las aristas de los recorridos 
+  get_edge_list(P1.path,&p1_list); 
+  get_edge_list(P2.path,&p2_list); 
 
-  fprintf(stdout,"done\n");
-  fflush(stdout);
+  // Combinar las aristas
+  city_edges neighbor_list = merge_city_edges_lists(p1_list,p2_list); 
 
-  /* erx(&neighbor_list,C2); */
+  C1.obj_eval(); 
+  fprintf(stdout,"recorrido antes: ["); 
+  for(int i=0; i < 10; i += 1){ 
+    fprintf(stdout,"%d,",C1.path[i]); 
+  } 
+  fprintf(stdout,"], obj_val: %lf \n",C1.cost); 
 
-}
+/*   print_city_edges(p1_list); */
+/*   print_city_edges(p2_list); */
+/*   print_city_edges(neighbor_list); */
+
+  
+
+  // Realizar la cruza 
+  erx(&neighbor_list, C1);  
+  erx(&neighbor_list, C2);  
+ 
+  C1.obj_eval(); 
+  fprintf(stdout,"recorrido después: ["); 
+  for(int i=0; i < 10; i += 1){ 
+    fprintf(stdout,"%d,",C1.path[i]); 
+  } 
+  fprintf(stdout,"], obj_val: %lf \n",C1.cost); 
+
+  /* print_city_edges(p1_list); */
+  /* print_city_edges(p2_list); */
+  /* print_city_edges(neighbor_list); */
+
+  /* fprintf(stdout,"out xover\n"); */  
+  time_t toc =  (time(0) - tic);
+  fprintf(stdout,"tiempo de la cruza: %ld\n",toc);
+  fflush(stdout); 
+} 
+
+
+
+ 
+
+
+
 #endif
