@@ -181,7 +181,40 @@ int random_int(int lower, int upper) {
   return ( rand() % (upper - lower + 1)) + lower;
 } 
 
+// Revisar si las ciudades aparecen solo una vez
+bool sol_sanity_check(int * path){ 
+  int city_cnt[NCITIES] = {0}; 
+  
+  for(int i=0; i < NCITIES+1; i += 1){ 
+    city_cnt[path[i]] += 1; 
+  } 
 
+  bool sane = true; 
+  if (city_cnt[0] != 2){ 
+    fprintf(stdout,"las ciudad 0 aparece %d veces en el recorrido\n",city_cnt[0]);
+    fflush(stdout);
+    sane = false; 
+  }
+  for(int i=1; i < NCITIES;  i+=1){ 
+    if (city_cnt[i] != 1){
+      fprintf(stdout,"las ciudad %d aparece %d veces en el recorrido\n", i,city_cnt[i]);
+      fflush(stdout);
+
+      sane = false; 
+      break; 
+    } 
+  } 
+
+  return sane; 
+}
+
+
+
+
+// Operador de cruza por recombinación de aristas
+//
+// 
+//
 void erx(city_edges * neighbor_list, CIndividual &C){ 
   
   // Reiniciar los punteros de búsqueda de la lista 
@@ -204,6 +237,30 @@ void erx(city_edges * neighbor_list, CIndividual &C){
   int x = 0; 
 
 
+
+  // Obtener la lista de ciudades vecinas
+  int cities_with_edge_to[NCITIES*4]; 
+  for(int i=0; i < NCITIES; i += 1){ 
+    int * ptr = cities_with_edge_to + (i*4); 
+    for(int j=0; j < 4; j+= 1){ 
+      ptr[j] = -1; 
+    }
+  } 
+  for(int i=0; i < neighbor_list->size; i+=1){ 
+    edge_list * list = neighbor_list->candidate + i; 
+    for(int j=0; j < list->size; j+= 1){ 
+      int id = list->edge[j]; 
+      int * ptr = cities_with_edge_to + (id*4); 
+      for(int k=0; k < 4; k += 1){ 
+        if(ptr[k] == -1){ 
+          ptr[k] = i; 
+          break; 
+        } 
+      } 
+    }
+  } 
+
+
   // Loop para crear el nuevo recorrido empleando las aristas candidatas de 
   while(true){ 
     
@@ -223,14 +280,18 @@ void erx(city_edges * neighbor_list, CIndividual &C){
     c_end -= 1; 
 
     // Borrar la ciudad de las ciudades candidatas
-    for(int i=0; i < neighbor_list->size; i+= 1){ 
-      edge_list * list = neighbor_list->candidate + i ; 
-      for(int j=0; j < list->end; j += 1){ 
-        if (list->edge[j] == x){ 
-          swp(list->edge,list->end-1,j); 
+    int * ptr = cities_with_edge_to + (x*4); 
+    for(int i=0; i < 4; i+=1){ 
+      if(ptr[i] == -1){ 
+        break; 
+      } 
+      edge_list * list = neighbor_list->candidate + ptr[i]; 
+      for(int j=0; j <= list->end; j+=1){ 
+        if(list->edge[j] == x){ 
+          swp(list->edge,list->end,j); 
           list->end -= 1; 
           break; 
-        } 
+        }
       } 
     } 
 
@@ -240,17 +301,22 @@ void erx(city_edges * neighbor_list, CIndividual &C){
       x = cities[random_int(0,c_end)]; 
     }else{ 
       int rem_cities = neighbor_list->candidate[x].end;
-      erx_tuple sorted[rem_cities]; 
+      erx_tuple min = {0,1.0/0.0};
       for(int i=0; i <= rem_cities; i+=1){ 
-        sorted[i].id = neighbor_list->candidate[x].edge[i]; 
-        sorted[i].val = neighbor_list->candidate[sorted[i].id].end;  
+        int    id    = neighbor_list->candidate[x].edge[i];
+        double value = neighbor_list->candidate[id].end;
+        if (min.val > value){ 
+          min.val = value; 
+          min.id  = id; 
+        } 
       }
-      qsort(sorted,rem_cities,sizeof(erx_tuple),cmp_fun); 
-      x = sorted[0].id; 
+      x = min.id; 
     } 
   } 
-  new_tour[NCITIES-1] = 0; 
+  new_tour[NCITIES] = 0; 
 
+  fprintf(stdout,"is_a_valid_tour : %s\n", ((sol_sanity_check(new_tour))? "yes" : "no"));
+  fflush(stdout);
 
   // Copiar el recorrido en el hijo 
   for(int i=0; i < NCITIES+1; i+=1){ 
@@ -259,11 +325,23 @@ void erx(city_edges * neighbor_list, CIndividual &C){
 } 
 
 
+ 
+
 void xover_kaggle(
   CIndividual &P1, 
   CIndividual &P2, 
   CIndividual &C1, 
   CIndividual &C2) { 
+
+
+
+  fprintf(stdout,"parent 1 is_a_valid_tour : %s\n", ((sol_sanity_check(P1.path))? "yes" : "no"));
+  fflush(stdout);
+  fprintf(stdout,"parent 2 is_a_valid_tour : %s\n", ((sol_sanity_check(P2.path))? "yes" : "no"));
+  fflush(stdout);
+
+
+
 
   fprintf(stdout,"iniciando la cruza\n"); 
   fflush(stdout); 
