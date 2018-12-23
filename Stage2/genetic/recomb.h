@@ -203,44 +203,24 @@ void erx(city_edges * neighbor_list, CIndividual &C){
   int t_ptr = 0; 
   int x = 0; 
 
-  /* fprintf(stdout,"start loop\n"); */
-  /* fflush(stdout); */
 
   // Loop para crear el nuevo recorrido empleando las aristas candidatas de 
   while(true){ 
     
-    /* fprintf(stdout,"t_ptr %d\n",t_ptr); */
-   // Agrega la ciudad al recorrido 
+    // Agrega la ciudad al recorrido 
     new_tour[t_ptr] = x; 
     t_ptr += 1;  
 
-    /* fprintf(stdout,"stop criteria %d\n",t_ptr); */
-    /* fflush(stdout); */
     // Criterio de paro (hemos terminado el recorrido
     if(t_ptr == NCITIES-1){ 
       break; 
     }
     
-    /* fprintf(stdout,"new_tour = ["); */ 
-    /* for(int i=0; i < 10; i += 1){ */ 
-    /*   fprintf(stdout,"%d,",new_tour[i]); */ 
-    /* } */ 
-    /* fprintf(stdout,"]\n"); */ 
-
-    /* fprintf(stdout,"x %d\n",x); */
-    /* fprintf(stdout,"c_end: %d, posx: %d, c_end:%d city_end: %d\n",x,indexes[x],c_end,cities[c_end]); */
-    /* fprintf(stdout,"NCITIES %d\n",NCITIES); */
-
     // Borrar la ciudad que se ha agregado al recorrido 
     swp(cities,indexes[x],c_end);
     indexes[x] = c_end; 
     indexes[cities[c_end]] = x; 
     c_end -= 1; 
-
-    /* if (t_ptr == 4){ */ 
-    /*   exit(0); */ 
-    /* } */ 
-    /* fprintf(stdout,"here\n"); */
 
     // Borrar la ciudad de las ciudades candidatas
     for(int i=0; i < neighbor_list->size; i+= 1){ 
@@ -261,12 +241,8 @@ void erx(city_edges * neighbor_list, CIndividual &C){
     }else{ 
       int rem_cities = neighbor_list->candidate[x].end;
       erx_tuple sorted[rem_cities]; 
-      /* fprintf(stdout,"rem_cities %d\n",rem_cities); */
       for(int i=0; i <= rem_cities; i+=1){ 
-        /* fprintf(stdout,"i%d\n",i); */
-        /* fprintf(stdout,"sorted[i].id %d\n",sorted[i]); */
         sorted[i].id = neighbor_list->candidate[x].edge[i]; 
-        /* fprintf(stdout,"sorted[i].id %d\n",sorted[i]); */
         sorted[i].val = neighbor_list->candidate[sorted[i].id].end;  
       }
       qsort(sorted,rem_cities,sizeof(erx_tuple),cmp_fun); 
@@ -293,7 +269,6 @@ void xover_kaggle(
   fflush(stdout); 
   time_t tic = time(0); 
 
-  /* fprintf(stdout,"Xover\n"); */ 
  
   // Inicializar las listas de aristas
     city_edges p1_list; 
@@ -315,11 +290,6 @@ void xover_kaggle(
   } 
   fprintf(stdout,"], obj_val: %lf \n",C1.cost); 
 
-/*   print_city_edges(p1_list); */
-/*   print_city_edges(p2_list); */
-/*   print_city_edges(neighbor_list); */
-
-  
 
   // Realizar la cruza 
   erx(&neighbor_list, C1);  
@@ -332,14 +302,13 @@ void xover_kaggle(
   } 
   fprintf(stdout,"], obj_val: %lf \n",C1.cost); 
 
-  /* print_city_edges(p1_list); */
-  /* print_city_edges(p2_list); */
-  /* print_city_edges(neighbor_list); */
-
-  /* fprintf(stdout,"out xover\n"); */  
   time_t toc =  (time(0) - tic);
   fprintf(stdout,"tiempo de la cruza: %ld\n",toc);
   fflush(stdout); 
+
+  free_city_edges(&p1_list); 
+  free_city_edges(&p2_list); 
+  free_city_edges(&neighbor_list); 
 } 
 
 
