@@ -269,14 +269,14 @@ void erx(city_edges * neighbor_list, CIndividual &C){
     t_ptr += 1;  
 
     // Criterio de paro (hemos terminado el recorrido
-    if(t_ptr == NCITIES-1){ 
+    if(t_ptr == NCITIES){ 
       break; 
     }
     
     // Borrar la ciudad que se ha agregado al recorrido 
+    indexes[cities[c_end]] = indexes[x]; 
     swp(cities,indexes[x],c_end);
     indexes[x] = c_end; 
-    indexes[cities[c_end]] = x; 
     c_end -= 1; 
 
     // Borrar la ciudad de las ciudades candidatas
@@ -297,7 +297,7 @@ void erx(city_edges * neighbor_list, CIndividual &C){
 
     // Seleccionar de forma aleatoria si no hay mas aristas en la ciudad en
     // la que estamos. 
-    if (neighbor_list->candidate[x].size == 0){ 
+    if (neighbor_list->candidate[x].end < 0){ 
       x = cities[random_int(0,c_end)]; 
     }else{ 
       int rem_cities = neighbor_list->candidate[x].end;
