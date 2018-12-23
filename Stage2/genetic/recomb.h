@@ -153,8 +153,8 @@ void erx(candidate_list * neighbor_list ,CIndividual &C){
   // Lista de ciudades candidatas 
   int candidates[NCITIES]; 
   for(int i=0; i < NCITIES; i += 1){ candidates[i] = i; } 
-  int end = NCITIES-1; 
-  int ptr = 0; 
+  /* int end = NCITIES-1; */ 
+  int c_ptr = NCITIES-1; 
   
   int * new_tour = C.path; 
   int t_ptr = 0; 
@@ -191,7 +191,7 @@ void erx(candidate_list * neighbor_list ,CIndividual &C){
     if(t_ptr == NCITIES-1){ break; } 
 
     // borrar la ciudad candidata
-    delete_in_list(x,candidates,&end);
+    delete_in_list(x,candidates,&c_ptr);
     for(int i=0; i < NCITIES; i+=1 ){ 
       edge_list * candidate = &(neighbor_list[0].candidate[i]); 
       int * list = &(candidate[0].edge[0]); 
@@ -199,7 +199,7 @@ void erx(candidate_list * neighbor_list ,CIndividual &C){
     } 
 
     if (neighbor_list[0].candidate[x].size == 0) { 
-      x = candidates[random_int(0,end)];
+      x = candidates[random_int(0,c_ptr)];
     } 
     else { 
       
