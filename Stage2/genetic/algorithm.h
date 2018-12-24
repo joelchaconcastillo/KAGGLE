@@ -36,7 +36,10 @@ public:
 
         void recombination(vector<CIndividual> &child_pop);
 
+	void evaluate(vector<CIndividual> &child_pop);
+
         void update_diversity_factor();
+
 
 	int distance(int *a, int *b);
 	void diversity_replacement(vector<CIndividual> &population, vector<CIndividual> &child_pop);
@@ -94,7 +97,16 @@ void GENETIC::evol_population()
         //binary tournament selction procedure
         binary_tournament_selection(population, child_pop);
         recombination(child_pop); 
+	//evaluation..
+	evaluate(child_pop);
 	diversity_replacement(population, child_pop);
+}
+void GENETIC::evaluate(vector<CIndividual> &child_pop)
+{
+	
+//   #pragma omp parallel for	
+   for(int i = 0; i < child_pop.size(); i++)
+	child_pop[i].obj_eval();
 }
 void GENETIC::diversity_replacement(vector<CIndividual> &population, vector<CIndividual> &child_pop)
 {
@@ -137,7 +149,7 @@ void GENETIC::diversity_replacement(vector<CIndividual> &population, vector<CInd
 	}
   }
 
-     vector<int> v_distances(penalized.size(), INFINITY);
+     vector<int> v_distances(penalized.size(), INT_MAX);
      for(int i = 0 ;  i < penalized.size(); i++)
 	{
 	   for(int j = 0; j< survivors.size(); j++)
@@ -238,7 +250,7 @@ void GENETIC::exec_emo(int run)
 	{
 		evol_population();
 		nfes += pops;
-	    if( !(nfes % (max_nfes/10)  ))
+	    if( !(nfes % (max_nfes/100)  ))
 	    {
 	      cout << "nfes... "<< nfes <<endl;
               save_front(filename2); //save the objective space information
