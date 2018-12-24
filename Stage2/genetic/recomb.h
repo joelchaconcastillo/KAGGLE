@@ -33,7 +33,9 @@ typedef struct{
 }edge_list;
 
 void free_edge_list(edge_list * list){ 
-  if( list->edge != NULL) {free(list->edge); }
+  if( list->edge != NULL) {
+    free(list->edge); 
+  }
   list->size = 0; 
   list->end = 0; 
 } 
@@ -47,7 +49,12 @@ typedef struct{
 }city_edges; 
 
 void free_city_edges(city_edges * list){ 
-  if( list->candidate != NULL){ free_edge_list(list->candidate) ; } 
+  if( list->candidate != NULL){ 
+    for(int i=0; i < list->size; i += 1){ 
+      free_edge_list(list->candidate + i) ; 
+    }
+    free(list->candidate); 
+  } 
   list->size = 0; 
   list->end = 0; 
 } 
@@ -85,7 +92,7 @@ void init_city_edges(city_edges * list){
     list->candidate[i].end = 0; 
   }
 
-  list->size = NCITIES-1; 
+  list->size = NCITIES; 
   list->end = NCITIES-1;
 } 
 
@@ -349,7 +356,7 @@ void xover_kaggle(
 
  
   // Inicializar las listas de aristas
-    city_edges p1_list; 
+  city_edges p1_list; 
   init_city_edges(&p1_list);  
   city_edges p2_list; 
   init_city_edges(&p2_list);  
@@ -387,6 +394,8 @@ void xover_kaggle(
   free_city_edges(&p1_list); 
   free_city_edges(&p2_list); 
   free_city_edges(&neighbor_list); 
+
+
 } 
 
 
