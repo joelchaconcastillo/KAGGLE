@@ -13,9 +13,10 @@
 #include <iomanip>
 #include <cfloat>
 #include "global.h"
-#include "recomb.h"
 #include "common.h"
 #include "individual.h"
+#include "recomb.h"
+#include "localsearch.h"
 
 class GENETIC
 {
@@ -38,6 +39,7 @@ public:
 
 	void evaluate(vector<CIndividual> &child_pop);
 
+	void improvement(vector<CIndividual> &child_pop);
         void update_diversity_factor();
 
 
@@ -99,11 +101,16 @@ void GENETIC::evol_population()
         recombination(child_pop); 
 	//evaluation..
 	evaluate(child_pop);
+	improvement(child_pop);
 	diversity_replacement(population, child_pop);
+	
+}
+void GENETIC::improvement(vector<CIndividual> &child_pop)
+{
+	LS1(child_pop);
 }
 void GENETIC::evaluate(vector<CIndividual> &child_pop)
 {
-	
 //   #pragma omp parallel for	
    for(int i = 0; i < child_pop.size(); i++)
 	child_pop[i].obj_eval();
@@ -209,6 +216,9 @@ void GENETIC::recombination(vector<CIndividual> &child_pop)
        int indexb = int(rnd_uni(&rnd_uni_init)*pops);	
 	//crossover
 	xover_kaggle(child_pop2[indexa], child_pop2[indexb], child_pop[i], child_pop[i+1]);
+
+		cout << std::setprecision(9)<< child_pop[i].cost<<endl;
+		cout << std::setprecision(9)<< child_pop[i+1].cost<<endl;
     }
 }
 void GENETIC::binary_tournament_selection(vector<CIndividual > &population, vector<CIndividual> &child_pop)

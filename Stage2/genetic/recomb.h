@@ -1,8 +1,8 @@
 #ifndef _RECOMBINATION_H_
 #define _RECOMBINATION_H_
 
-#include "global.h"
-#include "individual.h"
+//#include "global.h"
+//##include "individual.h"
 
 
 // Estructura para ordenar los ids por algún valor
