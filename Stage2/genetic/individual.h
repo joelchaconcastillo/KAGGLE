@@ -10,6 +10,7 @@ public:
 
 //	vector <int> path;
 	int path[MAX];
+        int inversePath[MAX];
 	double cost;
 	void   init(char *fileSolution);
 	void   obj_eval();
@@ -31,7 +32,7 @@ CIndividual::~CIndividual()
 }
 void CIndividual::init(char *fileSolution)
 {
-   readNewSolution(fileSolution, this->path);
+   readNewSolution(fileSolution, this->path, this->inversePath);
 }
 
 void CIndividual::obj_eval()

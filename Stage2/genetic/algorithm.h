@@ -86,6 +86,7 @@ void GENETIC::init_population() //read the initial paths..
 	}
 	if( i < pops) pops = i;
 	child_pop = population;
+   fclose(file);
 }
 void GENETIC::evol_population()
 {
@@ -189,7 +190,7 @@ void GENETIC::update_diversity_factor()
 void GENETIC::recombination(vector<CIndividual> &child_pop)
 {
    vector<CIndividual> child_pop2 = child_pop;
-	
+	 #pragma omp parallel for	
    for(int i = 0; i < child_pop.size(); i+=2)
     {
        int indexa = int(rnd_uni(&rnd_uni_init)*pops);
@@ -241,6 +242,7 @@ void GENETIC::exec_emo(int run)
 	    {
 	      cout << "nfes... "<< nfes <<endl;
               save_front(filename2); //save the objective space information
+		cout << "best... " << std::setprecision(9)<< population[0].cost<<endl;
 	    }
 	}
 	save_pos(filename1); //save the decision variable space information

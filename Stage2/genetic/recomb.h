@@ -322,8 +322,8 @@ void erx(city_edges * neighbor_list, CIndividual &C){
   } 
   new_tour[NCITIES] = 0; 
 
-  fprintf(stdout,"is_a_valid_tour : %s\n", ((sol_sanity_check(new_tour))? "yes" : "no"));
-  fflush(stdout);
+//  fprintf(stdout,"is_a_valid_tour : %s\n", ((sol_sanity_check(new_tour))? "yes" : "no"));
+ // fflush(stdout);
 
   // Copiar el recorrido en el hijo 
   for(int i=0; i < NCITIES+1; i+=1){ 
@@ -342,16 +342,16 @@ void xover_kaggle(
 
 
 
-  fprintf(stdout,"parent 1 is_a_valid_tour : %s\n", ((sol_sanity_check(P1.path))? "yes" : "no"));
-  fflush(stdout);
-  fprintf(stdout,"parent 2 is_a_valid_tour : %s\n", ((sol_sanity_check(P2.path))? "yes" : "no"));
-  fflush(stdout);
+//  fprintf(stdout,"parent 1 is_a_valid_tour : %s\n", ((sol_sanity_check(P1.path))? "yes" : "no"));
+//  fflush(stdout);
+//  fprintf(stdout,"parent 2 is_a_valid_tour : %s\n", ((sol_sanity_check(P2.path))? "yes" : "no"));
+//  fflush(stdout);
 
 
 
 
-  fprintf(stdout,"iniciando la cruza\n"); 
-  fflush(stdout); 
+//  fprintf(stdout,"iniciando la cruza\n"); 
+//  fflush(stdout); 
   time_t tic = time(0); 
 
  
@@ -369,11 +369,11 @@ void xover_kaggle(
   city_edges neighbor_list = merge_city_edges_lists(p1_list,p2_list); 
 
   C1.obj_eval(); 
-  fprintf(stdout,"recorrido antes: ["); 
-  for(int i=0; i < 10; i += 1){ 
-    fprintf(stdout,"%d,",C1.path[i]); 
-  } 
-  fprintf(stdout,"], obj_val: %lf \n",C1.cost); 
+//:  fprintf(stdout,"recorrido antes: ["); 
+//:  for(int i=0; i < 10; i += 1){ 
+//:    fprintf(stdout,"%d,",C1.path[i]); 
+//:  } 
+//:  fprintf(stdout,"], obj_val: %lf \n",C1.cost); 
 
 
   // Realizar la cruza 
@@ -381,15 +381,15 @@ void xover_kaggle(
   erx(&neighbor_list, C2);  
  
   C1.obj_eval(); 
-  fprintf(stdout,"recorrido después: ["); 
-  for(int i=0; i < 10; i += 1){ 
-    fprintf(stdout,"%d,",C1.path[i]); 
-  } 
-  fprintf(stdout,"], obj_val: %lf \n",C1.cost); 
+//  fprintf(stdout,"recorrido después: ["); 
+//  for(int i=0; i < 10; i += 1){ 
+//    fprintf(stdout,"%d,",C1.path[i]); 
+//  } 
+//  fprintf(stdout,"], obj_val: %lf \n",C1.cost); 
 
   time_t toc =  (time(0) - tic);
-  fprintf(stdout,"tiempo de la cruza: %ld\n",toc);
-  fflush(stdout); 
+//  fprintf(stdout,"tiempo de la cruza: %ld\n",toc);
+//  fflush(stdout); 
 
   free_city_edges(&p1_list); 
   free_city_edges(&p2_list); 

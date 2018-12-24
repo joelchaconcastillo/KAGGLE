@@ -5,7 +5,7 @@
 // ===========================================================================*/
 
 #include "algorithm.h"
-//#include <omp.h>
+#include <omp.h>
 void PrintHelp()
 {
 	cout << "Instructions:"<<endl;

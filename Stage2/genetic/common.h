@@ -18,7 +18,7 @@ void readInstance(char *filename_instance){
     }
     fclose(file);
 }
-void readNewSolution(char *fileSolution, int *path_segment){
+void readNewSolution(char *fileSolution, int *path_segment, int *inversePath){
     //strcpy(fileSolution, (*argv)[1]);
     char trash[100];
     FILE *file = fopen(fileSolution, "r");
@@ -32,6 +32,7 @@ void readNewSolution(char *fileSolution, int *path_segment){
     for(int i = 0; i < NCITIES; i++) 
     {
 	fscanf(file, "%d\n", path_segment + i);
+	inversePath[path_segment[i]] = i;
 	path_segment[i]--; //index zero..
     }
     fclose(file);
