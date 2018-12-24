@@ -36,7 +36,7 @@ void Kneares(int k, int index, int *nindex)
 	while(cont < k)	
 	{
 	   fscanf(file, "%lf %d\n", &distance, &indexc);
-	   if( (indexnPath[indexc] +1) %10==0)
+//	   if( (indexnPath[indexc] +1) %10==0)
 	   {
 		nindex[cont] = indexnPath[indexc];
 		cont++;
@@ -75,7 +75,7 @@ double getKNearestdistance(int k, int index)
 }
 void readInstance(){
     FILE *file = fopen(filename_instance, "r");
-    int N = NCITIES+1;//n = 197769;
+    int N = NCITIES;//n = 197769;
     double x, y;
     int id;
     char trash[100];
@@ -288,12 +288,26 @@ void saveNewSolution()
     for(int i = 0; i < NCITIES; i++) fprintf(file, "%d\n", nPath[i]);
     fclose(file);
 }
-
+void reversePath(int *pathc, int *invpath, int l, int r){
+    reverse(pathc + l, pathc + r + 1);
+    for(int i = l; i <= r; i++) invpath[pathc[i]] = i;
+}
 double evaluate(int *pathc){
     double len = 0.0;
-    for(int i = 0; i <= NCITIES; i++){
-        int j = (i + 1);//%NCITIES;
+    for(int i = 0; i < NCITIES; i++){
+        int j = (i + 1)%NCITIES;
         len += distd(i, pathc[i], pathc[j]);
+    }
+    return len;
+}
+double evaluate(int * pathc, int l, int r){
+    double len = 0.0;
+    int i = (l - 1 + NCITIES)%NCITIES;
+    while(true){
+        int j = (i + 1)%NCITIES;
+        len += distd(i, pathc[i], pathc[j]);
+        if(i == r) break;
+        i = j;
     }
     return len;
 }
