@@ -16,6 +16,7 @@
 #include "common.h"
 #include "individual.h"
 #include "recomb.h"
+#include "xover.h"
 #include "localsearch.h"
 
 class GENETIC
@@ -101,7 +102,7 @@ void GENETIC::evol_population()
         recombination(child_pop); 
 	//evaluation..
 	evaluate(child_pop);
-	improvement(child_pop);
+	//improvement(child_pop);
 	diversity_replacement(population, child_pop);
 	
 }
@@ -215,7 +216,8 @@ void GENETIC::recombination(vector<CIndividual> &child_pop)
        int indexa = int(rnd_uni(&rnd_uni_init)*pops);
        int indexb = int(rnd_uni(&rnd_uni_init)*pops);	
 	//crossover
-	xover_kaggle(child_pop2[indexa], child_pop2[indexb], child_pop[i], child_pop[i+1]);
+	//xover_kaggle(child_pop2[indexa], child_pop2[indexb], child_pop[i], child_pop[i+1]);
+	ERX_Symetric(child_pop2[indexa], child_pop2[indexb], child_pop[i], child_pop[i+1]);
 
 		cout << std::setprecision(9)<< child_pop[i].cost<<endl;
 		cout << std::setprecision(9)<< child_pop[i+1].cost<<endl;
