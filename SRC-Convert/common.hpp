@@ -15,6 +15,7 @@ double minx=MAX, miny=MAX, maxx=-MAX,maxy=-MAX, minknn=MAX, maxknn=-MAX;
 city cities[MAX];
 int path[MAX], nPath[MAX], path_segment[MAX], indexnPath[MAX];
 vector<int> primeIds;
+priority_queue<pair<double, int>> prime_sorted;
 bitset<MAX> used;
 int K = 1;
 int l, r, len;
@@ -25,7 +26,8 @@ int seed = 0;
 vector<vector<long long> > distances;
 bitset<1001000> isPrime;
 long long sieve_size;
-void Kneares(int k, int index, int *nindex)
+
+void Knearesdist(int k, int index, double *nindex)
 {
 	char filecity[1000];
 	sprintf(filecity,"/tmp/NNearest_files/%d.txt",index);
@@ -38,7 +40,27 @@ void Kneares(int k, int index, int *nindex)
 	   fscanf(file, "%lf %d\n", &distance, &indexc);
 //	   if( (indexnPath[indexc] +1) %10==0)
 	   {
-		nindex[cont] = indexnPath[indexc];
+		nindex[cont] = distance;
+		cont++;
+	   }
+	}
+        fclose(file);
+}
+void Kneares(int k, int index, vector<int> &nindex)
+{
+	char filecity[1000];
+	sprintf(filecity,"/tmp/NNearest_files/%d.txt",index);
+        FILE * file = fopen(filecity, "r");
+	double distance;
+	int indexc;
+	int cont = 0;
+	while(cont < k)	
+	{
+	   fscanf(file, "%lf %d\n", &distance, &indexc);
+//	   if( (indexnPath[indexc] +1) %10==0)
+	   {
+		nindex.push_back(indexnPath[indexc]);
+//		nindex[cont] = indexnPath[indexc];
 		cont++;
 	   }
 	}
@@ -46,6 +68,25 @@ void Kneares(int k, int index, int *nindex)
         fclose(file);
 
 }
+void Kneares(double ratio, int index, vector<int> &nindex)
+{
+	char filecity[1000];
+	sprintf(filecity,"/tmp/NNearest_files/%d.txt",index);
+        FILE * file = fopen(filecity, "r");
+	double distance;
+	int indexc;
+	fscanf(file, "%lf %d\n", &distance, &indexc);
+	double maxdist = distance*ratio;
+	while( distance <= maxdist)	
+	{
+	   fscanf(file, "%lf %d\n", &distance, &indexc);
+		nindex.push_back(indexnPath[indexc]);
+	}
+
+        fclose(file);
+
+}
+
 double getKNearestdistance(int k, int index)
 {
 	char filecity[1000];
@@ -89,8 +130,11 @@ void readInstance(){
 	maxx = max(maxx, x);
 	miny = min(miny, y);
 	maxy = min(miny, y);
+	double ne[1];
 	if( isPrime[id]) 
 	{
+	        Knearesdist(1,id , ne);
+		prime_sorted.push( make_pair(ne[0],id)  );
 		primeIds.pb(id);
 	}
 	
@@ -308,6 +352,45 @@ double evaluate(int * pathc, int l, int r){
         len += distd(i, pathc[i], pathc[j]);
         if(i == r) break;
         i = j;
+    }
+    return len;
+}
+double evaluatereverse(int * pathc, int l, int r){
+    double len = 0.0;
+	int a = min(l,r);
+	int b = max(l,r);
+	len = distd(a-1, pathc[a-1], pathc[b]);
+	for(int i = b, step=a; i >a; i--, step++)
+	   len += distd(step, pathc[i], pathc[i-1]);
+	len += distd(b, pathc[a], pathc[b+1]);
+
+    return len;
+}
+double evaluate(int * pathc, vector<int> &indexes){
+    double len = 0.0;
+    for(int k = 0; k < indexes.size()-1; k++)
+    {
+       int i = (indexes[k] - 1 + NCITIES)%NCITIES;
+       while(true){
+        int j = (i + 1)%NCITIES;
+        len += distd(i, pathc[i], pathc[j]);
+        if(i == indexes[k+1]) break;
+        i = j;
+       }
+    }
+    return len;
+}
+double evaluate2(int * pathc, vector<int> &indexes){
+    double len = 0.0;
+    for(int k = 0; k < indexes.size()-1; k++)
+    {
+       int i = (indexes[k] - 1 + NCITIES)%NCITIES;
+       while(true){
+        int j = (i + 1)%NCITIES;
+        len += distd(i, pathc[i], pathc[j]);
+        if(i == indexes[k+1]) break;
+        i = j;
+       }
     }
     return len;
 }

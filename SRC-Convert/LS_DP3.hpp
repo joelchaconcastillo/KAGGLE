@@ -80,7 +80,7 @@ void improvement_primes(int prime)
 		//fprintf(stdout, "%d\n", primeIds[i]);
 //		fprintf(stdout, "%d\n", prime);
 		int kk = 2;
-		  int indexneares[100];
+		vector<int> indexneares;
 
 	         //Kneares(kk, nPath[indexnPath[primeIds[i]]], indexneares);
 	         Kneares(kk, nPath[indexnPath[prime]], indexneares);

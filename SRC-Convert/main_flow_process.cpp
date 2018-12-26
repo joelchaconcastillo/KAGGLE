@@ -32,6 +32,7 @@ using namespace std;
 #define LKH3 103
 #define DP3 104
 #define LS2OPT 105
+#define LS2OPTPRIMES 106
 #include "common.hpp"
 #include "LKH_Replacement.hpp"
 #include "LKH3.hpp"
@@ -39,6 +40,7 @@ using namespace std;
 #include "LS_DP2.hpp"
 #include "LS_DP3.hpp"
 #include "2opt.hpp"
+#include "2opt-primes.hpp"
 void readParams(int *argc, char ***argv)
 {
     strcpy(filename_instance, (*argv)[1]);
@@ -61,7 +63,8 @@ int main(int argc, char **argv){
     strcpy(currentDirectory, "/home/joel.chacon/KAGGLE/git/KAGGLE/SRC-Convert");
     //int IMPROVEMENT = LKH3;//LKH_REPLACEMENT;
 
-     int IMPROVEMENT = LS2OPT;// LKH_REPLACEMENT;
+     int IMPROVEMENT = LS2OPTPRIMES;// LKH_REPLACEMENT;
+     //int IMPROVEMENT = LS2OPT;
     switch(IMPROVEMENT)
     {
        case DP:
@@ -81,6 +84,9 @@ int main(int argc, char **argv){
        break;
        case LS2OPT:
 	ls2opt();
+       break;
+       case LS2OPTPRIMES:
+	ls2optprimes();
        break;
     }
 
