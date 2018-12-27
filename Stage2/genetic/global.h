@@ -19,6 +19,7 @@ const int MAX = 1001000;
 
 
 using namespace std;
+
 struct city{
     int id;
     //long long x, y;
@@ -27,13 +28,14 @@ struct city{
 
 bitset<1001000> isPrime;
 long long sieve_size;
-city cities[MAX];
+//city cities[MAX];
+city *cities;
 vector<int> primeIds;
 
 //------------- Parameters in test instance ------------------
 int pops = 100; //population size
 int nvar  = NCITIES;
-char    currentPATH[1500];
+char    currentPATH[500];//filname path
 
 long int  max_nfes = 10000; //The function evaluation criteria is prefered than generations..
 //------------- Parameters in random number ------------------

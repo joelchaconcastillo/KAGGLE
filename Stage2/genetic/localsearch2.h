@@ -5,8 +5,8 @@
 //#include "individual.h"
 void ls2optprimes(CIndividual &C){
 
-    int *indexnPath = C.inversePath; 
-    int *nPath = C.path;
+    vector<int> indexnPath = C.inversePath; 
+    vector<int> nPath = C.path;
        vector<int> primespermtation = primeIds;
 	int repetitions = 50;
     int cont = repetitions;

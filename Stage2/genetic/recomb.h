@@ -101,7 +101,7 @@ void init_city_edges(city_edges * list){
 // aristas en ambas direcciones, pero cuando no es simétrico consideré es 
 // demasiado destructivo y solo se considera 0 .. x - b .. 0. 
 //
-void get_edge_list(int * path, city_edges * list){ 
+void get_edge_list(vector<int> & path, city_edges * list){ 
   for(int i=0; i < NCITIES; i+=1){ 
     int pos = list->candidate[path[i]].size; 
     list->candidate[path[i]].edge[pos] = path[i+1]; 

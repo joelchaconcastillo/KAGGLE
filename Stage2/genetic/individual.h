@@ -8,9 +8,9 @@ public:
 	CIndividual();
 	virtual ~CIndividual();
 
-//	vector <int> path;
-	int path[MAX];
-        int inversePath[MAX];
+	vector <int> path, inversePath;
+//	int *path;
+//        int *inversePath;
 	double cost;
 	void   init(char *fileSolution);
 	void   obj_eval();
@@ -28,7 +28,6 @@ CIndividual::CIndividual()
 }
 CIndividual::~CIndividual()
 {
-
 }
 void CIndividual::init(char *fileSolution)
 {

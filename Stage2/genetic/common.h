@@ -1,6 +1,5 @@
 #ifndef __COMMON_H_
 #define __COMMON_H_
-
 #include "global.h"
 
 void readInstance(char *filename_instance){
@@ -23,7 +22,7 @@ void readInstance(char *filename_instance){
     }
     fclose(file);
 }
-void readNewSolution(char *fileSolution, int *path_segment, int *inversePath){
+void readNewSolution(char *fileSolution, vector<int> &path_segment, vector<int> &inversePath){
     //strcpy(fileSolution, (*argv)[1]);
     char trash[100];
     FILE *file = fopen(fileSolution, "r");
@@ -34,9 +33,11 @@ void readNewSolution(char *fileSolution, int *path_segment, int *inversePath){
     fscanf(file, "%[^\n]\n", trash);
     fscanf(file, "%[^\n]\n", trash);
     //int l = atoi((*argv)[3]), r = atoi((*argv)[4]);
+    path_segment.resize(NCITIES);
+    inversePath.resize(NCITIES);
     for(int i = 0; i < NCITIES; i++) 
     {
-	fscanf(file, "%d\n", path_segment + i);
+	fscanf(file, "%d\n", &path_segment[i]);
 	path_segment[i]--; //index zero..
 	inversePath[path_segment[i]] = i;
     }
@@ -51,7 +52,7 @@ double distd(int pos, int c1, int c2){
     }
     else return d;
 }
-double evaluate(int *pathc){
+double evaluate(vector<int> &pathc){
     double len = 0.0;
     for(int i = 0; i < NCITIES; i++){
         int j = (i + 1)%NCITIES;
@@ -59,7 +60,7 @@ double evaluate(int *pathc){
     }
     return len;
 }
-double evaluate(int * pathc, int l, int r){
+double evaluate(vector<int> &pathc, int l, int r){
     double len = 0.0;
     int i = (l - 1 + NCITIES)%NCITIES;
     while(true){
@@ -97,8 +98,8 @@ void sieve(long long upperbound){
         for(long long j = i*i; j < sieve_size; j += i) isPrime[j] = false;
     }
 }
-void reversePath(int *pathc, int *invpath, int l, int r){
-    reverse(pathc + l, pathc + r + 1);
+void reversePath(vector<int> &pathc, vector<int> &invpath, int l, int r){
+    reverse(pathc.begin() + l, pathc.begin() + r + 1);
     for(int i = l; i <= r; i++) invpath[pathc[i]] = i;
 }
 double distdtsp(int pos, int c1, int c2){
