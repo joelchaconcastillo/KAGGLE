@@ -28,7 +28,7 @@ struct city{
 bitset<1001000> isPrime;
 long long sieve_size;
 city cities[MAX];
-
+vector<int> primeIds;
 
 //------------- Parameters in test instance ------------------
 int pops = 100; //population size

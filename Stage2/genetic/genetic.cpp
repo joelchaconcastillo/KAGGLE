@@ -36,7 +36,7 @@ void SetConfiguration(int argc, char*argv[])
 		else if(Terminal == "--nfes")
 			max_nfes = atoi(argv[++i]);
 		else if(Terminal == "--Dist_factor")
-			Initial_lowest_distance_factor= atof(argv[++i])*sqrt(nvar);
+			Initial_lowest_distance_factor= atof(argv[++i])*nvar;
 		else if(Terminal == "--help" || Terminal == "--h")
 			PrintHelp();
 		else

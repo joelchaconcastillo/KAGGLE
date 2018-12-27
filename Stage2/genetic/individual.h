@@ -53,6 +53,7 @@ void CIndividual::show_variable()
 void CIndividual::operator=(const CIndividual &ind2)
 {
 	for(int i =  0; i  < nvar; i++) path[i] = ind2.path[i];
+	for(int i =  0; i  < nvar; i++) inversePath[i] = ind2.inversePath[i];
 	cost = ind2.cost;
 }
 

@@ -18,6 +18,7 @@
 #include "recomb.h"
 #include "xover.h"
 #include "localsearch.h"
+#include "localsearch2.h"
 
 class GENETIC
 {
@@ -37,7 +38,7 @@ public:
         void binary_tournament_selection(vector<CIndividual > &population, vector<CIndividual> &child_pop);
 
         void recombination(vector<CIndividual> &child_pop);
-
+	void alternativerecombination(vector<CIndividual> &child_pop);
 	void evaluate(vector<CIndividual> &child_pop);
 
 	void improvement(vector<CIndividual> &child_pop);
@@ -99,16 +100,30 @@ void GENETIC::evol_population()
 	update_diversity_factor();
         //binary tournament selction procedure
         binary_tournament_selection(population, child_pop);
-        recombination(child_pop); 
+//        recombination(child_pop); 
+        alternativerecombination(child_pop); 
 	//evaluation..
 	evaluate(child_pop);
+	cout << "improvement parents"<<endl;
+	//improvement(population);
+	cout << "improvement offspring"<<endl;
 	//improvement(child_pop);
 	diversity_replacement(population, child_pop);
 	
 }
 void GENETIC::improvement(vector<CIndividual> &child_pop)
 {
-	LS1(child_pop);
+//	LS1(child_pop);
+	for(int i = 0; i < child_pop.size(); i++)
+          cout << "individual.. " << i <<" before improvement.. "<< std::setprecision(9)<< child_pop[i].cost<<endl;
+         #pragma omp parallel for	
+	for(int i = 0; i < child_pop.size(); i++)
+	{
+	   fast2opt(child_pop[i]);
+	}
+	for(int i = 0; i < child_pop.size(); i++)
+          cout << "individual " << i <<" after improvement.. "<< std::setprecision(9)<< child_pop[i].cost<<endl;
+   
 }
 void GENETIC::evaluate(vector<CIndividual> &child_pop)
 {
@@ -128,7 +143,7 @@ void GENETIC::diversity_replacement(vector<CIndividual> &population, vector<CInd
 	  pq.push( make_pair(-child_pop[i].cost, &child_pop[i]));
   }
 
-
+  
   while(!pq.empty() &&  survivors.size() < population.size())
   {
      pair<int, CIndividual*> data = pq.top();
@@ -210,17 +225,69 @@ void GENETIC::update_diversity_factor()
 void GENETIC::recombination(vector<CIndividual> &child_pop)
 {
    vector<CIndividual> child_pop2 = child_pop;
-	 #pragma omp parallel for	
+//	 #pragma omp parallel for	
    for(int i = 0; i < child_pop.size(); i+=2)
     {
        int indexa = int(rnd_uni(&rnd_uni_init)*pops);
        int indexb = int(rnd_uni(&rnd_uni_init)*pops);	
 	//crossover
-	//xover_kaggle(child_pop2[indexa], child_pop2[indexb], child_pop[i], child_pop[i+1]);
-	ERX_Symetric(child_pop2[indexa], child_pop2[indexb], child_pop[i], child_pop[i+1]);
+	  //mating nearest parents to indexa.....
+	  priority_queue< pair< int, int>> pq;
+	for(int j = 0; j < child_pop2.size(); j++)
+	{
+	   pq.push( make_pair(-distance(child_pop2[indexa].path, child_pop2[j].path), j));
+	} 
+	while(pq.top().first == 0 && !pq.empty()){ pq.pop(); 	indexb = pq.top().second;} //if distance is 0..
+	xover_kaggle(child_pop2[indexa], child_pop2[indexb], child_pop[i], child_pop[i+1]);
+//	ERX_Symetric(population[indexa], population[indexb], child_pop[i], child_pop[i+1]);
+//	AEX(population[indexa], population[indexb], child_pop[i], child_pop[i+1]);
+//	HGrex(population[indexa], population[indexb], child_pop[i]);
+//cout << std::setprecision(9)<< child_pop[i].cost<<endl;
+//cout << std::setprecision(9)<< child_pop[i+1].cost<<endl;
+    }
+}
+void GENETIC::alternativerecombination(vector<CIndividual> &child_pop)
+{
+cout << "lll"<<endl;	
+   vector<CIndividual> child_pop2 = child_pop;
+//	 #pragma omp parallel for	
+   for(int i = 0; i < child_pop.size(); i+=2)
+    {
+       int indexa = int(rnd_uni(&rnd_uni_init)*pops);
+       int indexb = int(rnd_uni(&rnd_uni_init)*pops);	
+       xover_kaggle(child_pop2[indexa], child_pop2[indexb], child_pop[i], child_pop[i+1]);
 
-		cout << std::setprecision(9)<< child_pop[i].cost<<endl;
-		cout << std::setprecision(9)<< child_pop[i+1].cost<<endl;
+
+	child_pop[i].obj_eval();
+	child_pop[i+1].obj_eval();
+//     for(int p = 0; p < 10; p++)
+     {   	
+	CIndividual A=child_pop2[i];
+	CIndividual B=child_pop2[i+1];
+        indexa = int(rnd_uni(&rnd_uni_init)*pops);
+	//crossover
+	  //mating nearest parents to indexa.....
+	  priority_queue< pair< int, int>> pq;
+	for(int j = 0; j < child_pop2.size(); j++)
+	{
+	   pq.push( make_pair(-distance(child_pop2[indexa].path, child_pop2[j].path), j));
+	} 
+	while(pq.top().first == 0 && !pq.empty()){ pq.pop(); 	indexb = pq.top().second;} //if distance is 0..
+	cout << indexa << " " <<indexb<<endl;
+       xover_kaggle(child_pop2[indexa], child_pop2[indexb], child_pop[i], child_pop[i+1]);
+	xover_kaggle(child_pop2[indexa], child_pop2[indexb], A, B);
+//	indA.obj_eval();
+//	indB.obj_eval();
+//
+//	if( indA.cost < child_pop[i].cost  ) child_pop[i] = indA;
+//	if( indB.cost < child_pop[i+1].cost  ) child_pop[i+1] = indB;
+
+//	ERX_Symetric(population[indexa], population[indexb], child_pop[i], child_pop[i+1]);
+//	AEX(population[indexa], population[indexb], child_pop[i], child_pop[i+1]);
+//	HGrex(population[indexa], population[indexb], child_pop[i]);
+//cout << std::setprecision(9)<< child_pop[i].cost<<endl;
+//cout << std::setprecision(9)<< child_pop[i+1].cost<<endl;
+     }
     }
 }
 void GENETIC::binary_tournament_selection(vector<CIndividual > &population, vector<CIndividual> &child_pop)

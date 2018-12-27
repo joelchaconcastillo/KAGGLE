@@ -328,6 +328,7 @@ void erx(city_edges * neighbor_list, CIndividual &C){
   // Copiar el recorrido en el hijo 
   for(int i=0; i < NCITIES+1; i+=1){ 
     C.path[i] = new_tour[i];  
+    C.inversePath[C.path[i]] = i;
   } 
 } 
 
@@ -368,7 +369,7 @@ void xover_kaggle(
   // Combinar las aristas
   city_edges neighbor_list = merge_city_edges_lists(p1_list,p2_list); 
 
-  C1.obj_eval(); 
+//  C1.obj_eval(); 
 //:  fprintf(stdout,"recorrido antes: ["); 
 //:  for(int i=0; i < 10; i += 1){ 
 //:    fprintf(stdout,"%d,",C1.path[i]); 
@@ -380,7 +381,7 @@ void xover_kaggle(
   erx(&neighbor_list, C1);  
   erx(&neighbor_list, C2);  
  
-  C1.obj_eval(); 
+  //C1.obj_eval(); 
 //  fprintf(stdout,"recorrido después: ["); 
 //  for(int i=0; i < 10; i += 1){ 
 //    fprintf(stdout,"%d,",C1.path[i]); 
