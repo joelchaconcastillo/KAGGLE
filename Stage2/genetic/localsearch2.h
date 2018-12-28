@@ -72,7 +72,7 @@ void fast2opt(CIndividual &C){
        for(int ii = 0; ii < permutation.size();ii++)
        {
            int i = C.inversePath[permutation[ii]];
-	//	if(!(ii%10000)) cout << ii<<endl;
+//		if(!(ii%10000)) cout << ii<<endl;
            if( i == 0 || i == NCITIES-1) continue;
            int K = 50;
            int nearestn[K+1];
@@ -101,47 +101,53 @@ void fast2opt(CIndividual &C){
 
          }
 //	  //2opt based in the edges..
-	for(int ii = 0; ii < permutation.size();ii++)
-       {
-           int i = C.inversePath[permutation[ii]];
- 	  for(int jj = max(2,i-10); jj < i; jj++)
-           {
-              int j = jj;//C.inversePath[C.path[jj]]%NCITIES;
-              double olddistance = evaluate( C.path, j, i);
-              reversePath( C.path,  C.inversePath, j, i);
-              double newdistance = evaluate( C.path, j, i);
-              if( newdistance >= olddistance)
-              {
-                   reversePath( C.path,  C.inversePath, j, i);
-              }
-		else 
-		    {
-		      improvements++;
-		
-		      flag = true;
-		    }
-           }
-	}
-	for(int ii = 0; ii < permutation.size();ii++)
-       {
-           int i = C.inversePath[permutation[ii]];
- 	  for(int jj = i+1; jj < min(NCITIES, i+10); jj++)
-           {
-              int j = jj;//C.inversePath[C.path[jj]]%NCITIES;
-              double olddistance = evaluate( C.path, i, j);
-              reversePath( C.path,  C.inversePath, i, j);
-              double newdistance = evaluate( C.path, i, j);
-              if( newdistance >= olddistance)
-              {
-                   reversePath( C.path,  C.inversePath, i, j);
-              }
-		else 
-		    {
-		    improvements++;
-		    flag = true;
-		   }
-           }
-	}
+//	for(int ii = 0; ii < permutation.size();ii++)
+//       {
+//		if(!(ii%10000)) cout <<"2" <<ii<<endl;
+//           int i = C.inversePath[permutation[ii]];
+//
+//           if( i == 0 || i == NCITIES-1) continue;
+// 	  for(int jj = max(2,i-10); jj < i; jj++)
+//           {
+//              int j = jj;//C.inversePath[C.path[jj]]%NCITIES;
+//              double olddistance = evaluate( C.path, j, i);
+//              reversePath( C.path,  C.inversePath, j, i);
+//              double newdistance = evaluate( C.path, j, i);
+//              if( newdistance >= olddistance)
+//              {
+//                   reversePath( C.path,  C.inversePath, j, i);
+//              }
+//		else 
+//		    {
+//		      improvements++;
+//		
+//		      flag = true;
+//		    }
+//           }
+//	}
+//	for(int ii = 0; ii < permutation.size();ii++)
+//       {
+//		if(!(ii%10000)) cout <<"3" <<ii<<endl;
+//           int i = C.inversePath[permutation[ii]];
+//
+//           if( i == 0 || i == NCITIES-1) continue;
+// 	  for(int jj = i+1; jj < min(NCITIES, i+10); jj++)
+//           {
+//              int j = jj;//C.inversePath[C.path[jj]]%NCITIES;
+//              double olddistance = evaluate( C.path, i, j);
+//              reversePath( C.path,  C.inversePath, i, j);
+//              double newdistance = evaluate( C.path, i, j);
+//              if( newdistance >= olddistance)
+//              {
+//                   reversePath( C.path,  C.inversePath, i, j);
+//              }
+//		else 
+//		    {
+//		    improvements++;
+//		    flag = true;
+//		   }
+//           }
+//	}
 	improvements = 0;
 	random_shuffle(permutation.begin(), permutation.end());
     }

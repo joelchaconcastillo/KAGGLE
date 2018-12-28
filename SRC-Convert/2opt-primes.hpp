@@ -29,12 +29,14 @@ void ls2optprimes(){
 int  enough = 0;	
 int jump=1;
 bool stuck=true;
+double best = 10000000;
  while(enough< NCITIES)
   {
 	vector<bool> checked(NCITIES, false);
 
          int maxite = 0;
-
+	best = min(evaluate(nPath),best);
+	printf("best... %lf\n", best);
 //       for(int ii = permutation.size()-1; ii >=0;ii--)
        for(int ii = 0; ii < permutation.size();ii++)
        {
@@ -46,7 +48,7 @@ bool stuck=true;
 	   int i = indexnPath[permutation[ii]];
 	checked[i]=true;
 //		if(!activecity[permutation[ii]])continue;
-	   if( !(ii%1000)) printf("%d %d %d\n", ii, i, enough);
+	   if( !(ii%1000)) printf("%d %d %d %lf\n", ii, i, enough, best);
 //      for( int i = indexnPath[primeIds[ii]]-4; i < indexnPath[primeIds[ii]]+4; i++)
 	  {
 	   i = i%NCITIES; 
@@ -120,7 +122,7 @@ bool stuck=true;
     saveNewSolution();
    jump++;
 
-int ai=100, bi=500;
+int ai=(rand()%NCITIES)-20, bi=ai+4;
 if(stuck)
 {
 		   random_shuffle(nPath+ai, nPath+bi); 
