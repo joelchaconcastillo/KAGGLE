@@ -101,14 +101,14 @@ void GENETIC::evol_population()
 	update_diversity_factor();
         //binary tournament selction procedure
         binary_tournament_selection(population, child_pop);
-//        recombination(child_pop); 
-        alternativerecombination(child_pop); 
+        recombination(child_pop); 
+//        alternativerecombination(child_pop); 
 	//evaluation..
 	evaluate(child_pop);
-	cout << "improvement parents"<<endl;
-	improvement(population);
-	cout << "improvement offspring"<<endl;
-	improvement(child_pop);
+	//cout << "improvement parents"<<endl;
+//	improvement(population);
+//	cout << "improvement offspring"<<endl;
+//	improvement(child_pop);
 	diversity_replacement(population, child_pop);
 	
 }
@@ -117,7 +117,7 @@ void GENETIC::improvement(vector<CIndividual> &child_pop)
 //	LS1(child_pop);
 	for(int i = 0; i < child_pop.size(); i++)
           cout << "individual.. " << i <<" before improvement.. "<< std::setprecision(9)<< child_pop[i].cost<<endl;
-         #pragma omp parallel for	
+        // #pragma omp parallel for	
 	for(int i = 0; i < child_pop.size(); i++)
 	{
 	   fast2opt(child_pop[i]);
@@ -243,8 +243,10 @@ void GENETIC::recombination(vector<CIndividual> &child_pop)
 //	ERX_Symetric(population[indexa], population[indexb], child_pop[i], child_pop[i+1]);
 //	AEX(population[indexa], population[indexb], child_pop[i], child_pop[i+1]);
 //	HGrex(population[indexa], population[indexb], child_pop[i]);
-//cout <<"op "<< std::setprecision(9)<< child_pop[i].cost<<endl;
-//cout <<"op " <<std::setprecision(9)<< child_pop[i+1].cost<<endl;
+   child_pop[i].obj_eval();
+   child_pop[i+1].obj_eval();
+cout <<"op "<< std::setprecision(9)<< child_pop[i].cost<<endl;
+cout <<"op " <<std::setprecision(9)<< child_pop[i+1].cost<<endl;
     }
 }
 void GENETIC::alternativerecombination(vector<CIndividual> &child_pop)
@@ -336,7 +338,7 @@ void GENETIC::exec_emo(int run)
 	{
 		evol_population();
 		nfes += pops;
-	    if( !(nfes % (max_nfes/100)  ))
+	    if( !(nfes % (int)(0.1*max_nfes)  ))
 	    {
 	      cout << "nfes... "<< nfes <<endl;
               save_front(filename2); //save the objective space information

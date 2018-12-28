@@ -104,7 +104,7 @@ void init_city_edges(city_edges * list){
 void get_edge_list(vector<int> & path, city_edges * list){ 
   for(int i=0; i < NCITIES; i+=1){ 
     int pos = list->candidate[path[i]].size; 
-    list->candidate[path[i]].edge[pos] = path[i+1]; 
+    list->candidate[path[i]].edge[pos] = path[(i+1)%NCITIES]; 
     list->candidate[path[i]].size += 1; 
   }
 }
@@ -231,25 +231,28 @@ void erx(city_edges * neighbor_list, CIndividual &C){
   } 
 
   // Crear la lista de ciudades candidatas
-  int cities[NCITIES]; 
-  int indexes[NCITIES]; 
+  //int cities[NCITIES]; 
+  int *cities = (int*) malloc(sizeof(int)*NCITIES); 
+  //int indexes[NCITIES]; 
+  int *indexes= (int*) malloc(sizeof(int)*NCITIES); 
+  
   for(int i=0; i < NCITIES; i+=1){ 
     cities[i] = i; 
     indexes[i] = i; 
   }
   int c_end = NCITIES-1; 
 
-  int new_tour[NCITIES+1];
+//  int new_tour[NCITIES+1];
+  int *new_tour= (int*) malloc(sizeof(int)*NCITIES+1); 
   int t_ptr = 0; 
   int x = 0; 
 
 
-
   // Obtener la lista de ciudades vecinas
-  int cities_with_edge_to[NCITIES*4]; 
+  int cities_with_edge_to[NCITIES*2]; 
   for(int i=0; i < NCITIES; i += 1){ 
-    int * ptr = cities_with_edge_to + (i*4); 
-    for(int j=0; j < 4; j+= 1){ 
+    int * ptr = cities_with_edge_to + (i*2); 
+    for(int j=0; j < 2; j+= 1){ 
       ptr[j] = -1; 
     }
   } 
@@ -257,8 +260,8 @@ void erx(city_edges * neighbor_list, CIndividual &C){
     edge_list * list = neighbor_list->candidate + i; 
     for(int j=0; j < list->size; j+= 1){ 
       int id = list->edge[j]; 
-      int * ptr = cities_with_edge_to + (id*4); 
-      for(int k=0; k < 4; k += 1){ 
+      int * ptr = cities_with_edge_to + (id*2); 
+      for(int k=0; k < 2; k += 1){ 
         if(ptr[k] == -1){ 
           ptr[k] = i; 
           break; 
@@ -287,8 +290,8 @@ void erx(city_edges * neighbor_list, CIndividual &C){
     c_end -= 1; 
 
     // Borrar la ciudad de las ciudades candidatas
-    int * ptr = cities_with_edge_to + (x*4); 
-    for(int i=0; i < 4; i+=1){ 
+    int * ptr = cities_with_edge_to + (x*2); 
+    for(int i=0; i < 2; i+=1){ 
       if(ptr[i] == -1){ 
         break; 
       } 
@@ -320,16 +323,18 @@ void erx(city_edges * neighbor_list, CIndividual &C){
       x = min.id; 
     } 
   } 
-  new_tour[NCITIES] = 0; 
+//  new_tour[NCITIES] = 0; 
 
 //  fprintf(stdout,"is_a_valid_tour : %s\n", ((sol_sanity_check(new_tour))? "yes" : "no"));
  // fflush(stdout);
-
   // Copiar el recorrido en el hijo 
-  for(int i=0; i < NCITIES+1; i+=1){ 
+  for(int i=0; i < NCITIES; i+=1){ 
     C.path[i] = new_tour[i];  
     C.inversePath[C.path[i]] = i;
   } 
+    free(cities);
+    free(indexes);
+    free(new_tour);
 } 
 
 
@@ -359,9 +364,9 @@ void xover_kaggle(
   // Inicializar las listas de aristas
   city_edges p1_list; 
   init_city_edges(&p1_list);  
+
   city_edges p2_list; 
   init_city_edges(&p2_list);  
-
   // Extraer las aristas de los recorridos 
   get_edge_list(P1.path,&p1_list); 
   get_edge_list(P2.path,&p2_list); 

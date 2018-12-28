@@ -108,7 +108,7 @@ double distdtsp(int pos, int c1, int c2){
 
 void Kneares(int k, int index, int *nindex)
 {
-        char filecity[1000];
+        char filecity[500];
         sprintf(filecity,"/tmp/NNearest_files/%d.txt",index);
         FILE * file = fopen(filecity, "r");
         double distance;
