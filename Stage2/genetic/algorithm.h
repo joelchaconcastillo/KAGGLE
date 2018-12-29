@@ -117,7 +117,7 @@ void GENETIC::improvement(vector<CIndividual> &child_pop)
 //	LS1(child_pop);
 	for(int i = 0; i < child_pop.size(); i++)
           cout << "individual.. " << i <<" before improvement.. "<< std::setprecision(9)<< child_pop[i].cost<<endl;
-        // #pragma omp parallel for	
+         #pragma omp parallel for	
 	for(int i = 0; i < child_pop.size(); i++)
 	{
 	   fast2opt(child_pop[i]);
