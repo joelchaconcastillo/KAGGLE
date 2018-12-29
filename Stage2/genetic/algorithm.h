@@ -108,7 +108,7 @@ void GENETIC::evol_population()
 	//cout << "improvement parents"<<endl;
 //	improvement(population);
 //	cout << "improvement offspring"<<endl;
-//	improvement(child_pop);
+	improvement(child_pop);
 	diversity_replacement(population, child_pop);
 	
 }
@@ -233,16 +233,20 @@ void GENETIC::recombination(vector<CIndividual> &child_pop)
        int indexb = int(rnd_uni(&rnd_uni_init)*pops);	
 	//crossover
 	  //mating nearest parents to indexa.....
-	  priority_queue< pair< int, int>> pq;
-	for(int j = 0; j < child_pop2.size(); j++)
-	{
-	   pq.push( make_pair(-distance(child_pop2[indexa].path, child_pop2[j].path), j));
-	} 
-	while(pq.top().first == 0 && !pq.empty()){ pq.pop(); 	indexb = pq.top().second;} //if distance is 0..
-	xover_kaggle(child_pop2[indexa], child_pop2[indexb], child_pop[i], child_pop[i+1]);
-//	ERX_Symetric(population[indexa], population[indexb], child_pop[i], child_pop[i+1]);
+//	  priority_queue< pair< int, int>> pq;
+//	for(int j = 0; j < child_pop2.size(); j++)
+//	{
+//	   pq.push( make_pair(-distance(child_pop2[indexa].path, child_pop2[j].path), j));
+//	} 
+//	while(pq.top().first == 0 && !pq.empty()){ pq.pop(); 	indexb = pq.top().second;} //if distance is 0..
+	//xover_kaggle(child_pop2[indexa], child_pop2[indexb], child_pop[i], child_pop[i+1]);
+//	ERX_Symetric(child_pop2[indexa], child_pop2[indexb], child_pop[i], child_pop[i+1]);
 //	AEX(population[indexa], population[indexb], child_pop[i], child_pop[i+1]);
-//	HGrex(population[indexa], population[indexb], child_pop[i]);
+	HGrex2opt(child_pop2[indexa], child_pop2[indexb], child_pop[i]);
+       indexa = int(rnd_uni(&rnd_uni_init)*pops);
+       indexb = int(rnd_uni(&rnd_uni_init)*pops);	
+	HGrex2opt(child_pop2[indexa], child_pop2[indexb], child_pop[i+1]);
+//	HGrex(child_pop2[indexa], child_pop2[(indexb+1)%pops], child_pop[i+1]);
    child_pop[i].obj_eval();
    child_pop[i+1].obj_eval();
 cout <<"op "<< std::setprecision(9)<< child_pop[i].cost<<endl;
