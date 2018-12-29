@@ -58,13 +58,15 @@ int main(int argc, char **argv){
   ///////Prepare data and read information
     sieve(400000);// printf("End Sieve\n");
     readParams(&argc, &argv);
+
     readSolution();
     readInstance();
-    strcpy(currentDirectory, "/home/joel.chacon/KAGGLE/git/KAGGLE/SRC-Convert");
+    //strcpy(currentDirectory, "/home/joel.chacon/KAGGLE/git/KAGGLE/SRC-Convert");
+    strcpy(currentDirectory, "./");
     //int IMPROVEMENT = LKH3;//LKH_REPLACEMENT;
 
-     int IMPROVEMENT = LS2OPTPRIMES;// LKH_REPLACEMENT;
-     //int IMPROVEMENT = LS2OPT;
+     //int IMPROVEMENT = LS2OPTPRIMES;// LKH_REPLACEMENT;
+     int IMPROVEMENT = LS2OPT;
     switch(IMPROVEMENT)
     {
        case DP:

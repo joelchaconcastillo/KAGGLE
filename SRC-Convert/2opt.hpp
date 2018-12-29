@@ -7,59 +7,23 @@ void ls2opt(){
 	int indexnPathtmp[NCITIES];
     for(int i = 0; i < NCITIES; i++)
     {
-	
 	nPath[i] = path[i];
-	Permutation[i] = i;
 	indexnPathtmp[nPath[i]]=i;
     }
-    int cont = 100;
-  //  while(cont--)
-    {
-//       random_shuffle(Permutation.begin(), Permutation.end()); 
-       for(int ii = 1; ii < NCITIES;ii++)
+       for(int i = 1; i < NCITIES-1;i++)
        {
-	   if( !(ii%100)) printf("%d\n", ii);
-	
-           if( Permutation[ii] == 0 || Permutation[ii] == NCITIES-1) continue;
-	   int i = Permutation[ii];
-	   int K = 10;
-		vector<int> nearestn;
-	    Kneares(K, nPath[i], nearestn);
-//	      cout << ii << " " << Permutation[ii]<<endl;
-  //         for(int jj = ii+1; jj < NCITIES; jj++)
-
-           for(int jj = 0; jj < K; jj++)
-           {
-//		cout <<jj <<endl;
-		int j = nearestn[jj]%NCITIES;
-		if(j==0)continue;
-		
-	   if( !(j%10000)) printf("%d\n", j);
-
-		if( max(i,j) - min(i,j) > 5000) continue;
+	   if( !(i%10000)) printf("i %d\n", i);
+           for(int j = i+1; j < i+10000 && j < NCITIES; j++)
+	   {
               double olddistance = evaluate(nPath, i, j);
-//	      reversePath(nPath, indexnPath, i, j);
-	
-//              reverse(nPath+i, nPath+j);
               double newdistance = evaluatereverse(nPath, i, j);
-	//	printf("%lf %lf %d %d %d %d\n", olddistance, newdistance,i,j, nPath[i], nPath[j]);
-              if( newdistance >= olddistance)
-              {	
-              //   reverse(nPath+i, nPath+j);
-              }
-              else
+              if( newdistance < olddistance)
               {
-				
-	           reversePath(nPath, indexnPath, i, j);
-	      printf("pivot %d %d %f\n", i, j, evaluate(nPath));
-       	      //random_shuffle(Permutation.begin(), Permutation.end()); 
-//                 ii = 0;
+	           reversePath(nPath, indexnPathtmp, i, j);
+	           printf("pivot %d %d %f\n", i, j, evaluate(nPath));
               }
-              
            }
        }
-    }
-
 	      printf("pivot %f\n",evaluate(nPath));
 }
 #endif

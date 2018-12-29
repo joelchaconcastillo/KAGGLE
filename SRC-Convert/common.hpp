@@ -15,7 +15,7 @@ double minx=MAX, miny=MAX, maxx=-MAX,maxy=-MAX, minknn=MAX, maxknn=-MAX;
 city cities[MAX];
 int path[MAX], nPath[MAX], path_segment[MAX], indexnPath[MAX];
 vector<int> primeIds;
-priority_queue<pair<double, int>> prime_sorted;
+priority_queue<pair<double, int> > prime_sorted;
 bitset<MAX> used;
 int K = 1;
 int l, r, len;
@@ -133,8 +133,8 @@ void readInstance(){
 	double ne[1];
 	if( isPrime[id]) 
 	{
-	        Knearesdist(1,id , ne);
-		prime_sorted.push( make_pair(ne[0],id)  );
+//	        Knearesdist(1,id , ne);
+//		prime_sorted.push( make_pair(ne[0],id)  );
 		primeIds.pb(id);
 	}
 	
@@ -357,13 +357,10 @@ double evaluate(int * pathc, int l, int r){
 }
 double evaluatereverse(int * pathc, int l, int r){
     double len = 0.0;
-	int a = min(l,r);
-	int b = max(l,r);
-	len = distd(a-1, pathc[a-1], pathc[b]);
-	for(int i = b, step=a; i >a; i--, step++)
-	   len += distd(step, pathc[i], pathc[i-1]);
-	len += distd(b, pathc[a], pathc[b+1]);
-
+	len = distd(l-1, pathc[(l-1+NCITIES)%NCITIES], pathc[r]);
+	for(int i = r, step=l; i >l; i--, step++)
+	   len += distd(step, pathc[i], pathc[(i-1+NCITIES)%NCITIES]);
+	len += distd(r, pathc[l], pathc[(r+1)%NCITIES]);
     return len;
 }
 double evaluate(int * pathc, vector<int> &indexes){
