@@ -227,30 +227,30 @@ void GENETIC::recombination(vector<CIndividual> &child_pop)
 {
    vector<CIndividual> child_pop2 = child_pop;
 //	 #pragma omp parallel for	
-   for(int i = 0; i < child_pop.size(); i+=2)
+   for(int i = 0; i < child_pop.size(); i++)
     {
        int indexa = int(rnd_uni(&rnd_uni_init)*pops);
        int indexb = int(rnd_uni(&rnd_uni_init)*pops);	
 	//crossover
 	  //mating nearest parents to indexa.....
-//	  priority_queue< pair< int, int>> pq;
-//	for(int j = 0; j < child_pop2.size(); j++)
-//	{
-//	   pq.push( make_pair(-distance(child_pop2[indexa].path, child_pop2[j].path), j));
-//	} 
-//	while(pq.top().first == 0 && !pq.empty()){ pq.pop(); 	indexb = pq.top().second;} //if distance is 0..
+	  priority_queue< pair< int, int>> pq;
+	for(int j = 0; j < child_pop2.size(); j++)
+	{
+	   pq.push( make_pair(-distance(child_pop2[indexa].path, child_pop2[j].path), j));
+	} 
+	while(pq.top().first == 0 && !pq.empty()){ pq.pop(); 	indexb = pq.top().second;} //if distance is 0..
 	//xover_kaggle(child_pop2[indexa], child_pop2[indexb], child_pop[i], child_pop[i+1]);
 //	ERX_Symetric(child_pop2[indexa], child_pop2[indexb], child_pop[i], child_pop[i+1]);
 //	AEX(population[indexa], population[indexb], child_pop[i], child_pop[i+1]);
 	HGrex2opt(child_pop2[indexa], child_pop2[indexb], child_pop[i]);
-       indexa = int(rnd_uni(&rnd_uni_init)*pops);
-       indexb = int(rnd_uni(&rnd_uni_init)*pops);	
-	HGrex2opt(child_pop2[indexa], child_pop2[indexb], child_pop[i+1]);
+//       indexa = int(rnd_uni(&rnd_uni_init)*pops);
+//       indexb = int(rnd_uni(&rnd_uni_init)*pops);	
+//	HGrex2opt(child_pop2[indexa], child_pop2[indexb], child_pop[i+1]);
 //	HGrex(child_pop2[indexa], child_pop2[(indexb+1)%pops], child_pop[i+1]);
    child_pop[i].obj_eval();
-   child_pop[i+1].obj_eval();
+//   child_pop[i+1].obj_eval();
 cout <<"op "<< std::setprecision(9)<< child_pop[i].cost<<endl;
-cout <<"op " <<std::setprecision(9)<< child_pop[i+1].cost<<endl;
+//cout <<"op " <<std::setprecision(9)<< child_pop[i+1].cost<<endl;
     }
 }
 void GENETIC::alternativerecombination(vector<CIndividual> &child_pop)
