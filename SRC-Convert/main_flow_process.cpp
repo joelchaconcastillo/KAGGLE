@@ -61,8 +61,8 @@ int main(int argc, char **argv){
 
     readSolution();
     readInstance();
-    //strcpy(currentDirectory, "/home/joel.chacon/KAGGLE/git/KAGGLE/SRC-Convert");
-    strcpy(currentDirectory, "./");
+    strcpy(currentDirectory, "/home/joel.chacon/KAGGLE/git/KAGGLE/SRC-Convert");
+    //strcpy(currentDirectory, "./");
     //int IMPROVEMENT = LKH3;//LKH_REPLACEMENT;
 
      //int IMPROVEMENT = LS2OPTPRIMES;// LKH_REPLACEMENT;
@@ -85,7 +85,7 @@ int main(int argc, char **argv){
         LKH3_Procedure();
        break;
        case LS2OPT:
-	ls2opt();
+	lsfasfastt3opt();
        break;
        case LS2OPTPRIMES:
 	ls2optprimes();
