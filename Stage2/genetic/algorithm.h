@@ -12,6 +12,8 @@
 #include <queue>
 #include <iomanip>
 #include <cfloat>
+#include <ctime>
+#include <omp.h>
 #include "global.h"
 #include "common.h"
 #include "individual.h"
@@ -92,7 +94,7 @@ void GENETIC::init_population() //read the initial paths..
 		nfes++;
 		i++;
 	}
-	if( i < pops) pops = i;
+	if( i < pops) pops = i; //if there are less individual files availables..
 	child_pop = population;
    fclose(file);
 }
@@ -102,12 +104,8 @@ void GENETIC::evol_population()
         //binary tournament selction procedure
         binary_tournament_selection(population, child_pop);
         recombination(child_pop); 
-//        alternativerecombination(child_pop); 
 	//evaluation..
 	evaluate(child_pop);
-	//cout << "improvement parents"<<endl;
-//	improvement(population);
-//	cout << "improvement offspring"<<endl;
 	improvement(child_pop);
 	diversity_replacement(population, child_pop);
 	
@@ -216,6 +214,7 @@ void GENETIC::diversity_replacement(vector<CIndividual> &population, vector<CInd
 	 tmpPopulation.push_back(*survivors[i]); //note: this is necessary because we are working with memmory address
   }
    population = tmpPopulation;
+  for(int i = 0 ; i < population.size(); i++)cout << "SELECTION... "<<i<<" "<<population[i].cost<<endl;
 }
 //updates the lowest distance factor of the diversity explicitly promoted
 void GENETIC::update_diversity_factor()
@@ -227,37 +226,29 @@ void GENETIC::recombination(vector<CIndividual> &child_pop)
 {
    vector<CIndividual> child_pop2 = child_pop;
 //	 #pragma omp parallel for	
-   for(int i = 0; i < child_pop.size(); i++)
+   for(int i = 0; i < child_pop.size(); i+=2)
     {
        int indexa = int(rnd_uni(&rnd_uni_init)*pops);
        int indexb = int(rnd_uni(&rnd_uni_init)*pops);	
 	//crossover
-	  //mating nearest parents to indexa.....
-	  priority_queue< pair< int, int>> pq;
-	for(int j = 0; j < child_pop2.size(); j++)
-	{
-	   pq.push( make_pair(-distance(child_pop2[indexa].path, child_pop2[j].path), j));
-	} 
-	while(pq.top().first == 0 && !pq.empty()){ pq.pop(); 	indexb = pq.top().second;} //if distance is 0..
 	//xover_kaggle(child_pop2[indexa], child_pop2[indexb], child_pop[i], child_pop[i+1]);
-//	ERX_Symetric(child_pop2[indexa], child_pop2[indexb], child_pop[i], child_pop[i+1]);
+	ERX_Symetric(child_pop2[indexa], child_pop2[indexb], child_pop[i], child_pop[i+1]);
+//	ERX_Asymetric(child_pop2[indexa], child_pop2[indexb], child_pop[i], child_pop[i+1]);
 //	AEX(population[indexa], population[indexb], child_pop[i], child_pop[i+1]);
-	HGrex2opt(child_pop2[indexa], child_pop2[indexb], child_pop[i]);
-//       indexa = int(rnd_uni(&rnd_uni_init)*pops);
-//       indexb = int(rnd_uni(&rnd_uni_init)*pops);	
-//	HGrex2opt(child_pop2[indexa], child_pop2[indexb], child_pop[i+1]);
-//	HGrex(child_pop2[indexa], child_pop2[(indexb+1)%pops], child_pop[i+1]);
+	//HGrex2opt(child_pop2[indexa], child_pop2[indexb], child_pop[i+1]);
+//	HGrexNearest(child_pop2[indexa], child_pop2[indexb], child_pop[i+1]);
+
    child_pop[i].obj_eval();
-//   child_pop[i+1].obj_eval();
-cout <<"op "<< std::setprecision(9)<< child_pop[i].cost<<endl;
-//cout <<"op " <<std::setprecision(9)<< child_pop[i+1].cost<<endl;
+   child_pop[i+1].obj_eval();
+cout <<"output cost after crossover "<< std::setprecision(9)<< child_pop[i].cost<<endl;
+cout <<"output cost after crossover "<< std::setprecision(9)<< child_pop[i+1].cost<<endl;
     }
 }
-void GENETIC::alternativerecombination(vector<CIndividual> &child_pop)
+void GENETIC::alternativerecombination(vector<CIndividual> &child_pop) //mating restriction..
 {
    vector<CIndividual> child_pop2 = child_pop;
 //	 #pragma omp parallel for	
-   for(int i = 0; i < child_pop.size(); i+=2)
+   for(int i = 0; i < child_pop.size(); i++)
     {
        int indexa = int(rnd_uni(&rnd_uni_init)*pops);
        int indexb = int(rnd_uni(&rnd_uni_init)*pops);	
@@ -266,14 +257,16 @@ void GENETIC::alternativerecombination(vector<CIndividual> &child_pop)
 	{
        		indexb = int(rnd_uni(&rnd_uni_init)*pops);	
 	}
-       xover_kaggle(child_pop2[indexa], child_pop2[indexb], child_pop[i], child_pop[i+1]);
+//	HGrex2opt(child_pop2[indexa], child_pop2[indexb], child_pop[i]);
+	HGrexNearest(child_pop2[indexa], child_pop2[indexb], child_pop[i]);
+       //xover_kaggle(child_pop2[indexa], child_pop2[indexb], child_pop[i], child_pop[i+1]);
 
 	child_pop[i].obj_eval();
-	child_pop[i+1].obj_eval();
+//	child_pop[i+1].obj_eval();
      for(int p = 0; p < 10; p++)
      {   	
 	CIndividual A=child_pop[i];
-	CIndividual B=child_pop[i+1];
+//	CIndividual B=child_pop[i+1];
         indexa = int(rnd_uni(&rnd_uni_init)*pops);
 ///	while( distance(child_pop2[indexa].path, child_pop2[indexb].path) == 0)
 ///	{
@@ -288,19 +281,21 @@ void GENETIC::alternativerecombination(vector<CIndividual> &child_pop)
 	} 
 	while(pq.top().first == 0 && !pq.empty()){ pq.pop(); 	indexb = pq.top().second;} //if distance is 0..
        //xover_kaggle(child_pop2[indexa], child_pop2[indexb], child_pop[i], child_pop[i+1]);
-	xover_kaggle(child_pop2[indexa], child_pop2[indexb], A, B);
+	//xover_kaggle(child_pop2[indexa], child_pop2[indexb], A, B);
+	//HGrex2opt(child_pop2[indexa], child_pop2[indexb], A);
+	HGrexNearest(child_pop2[indexa], child_pop2[indexb], child_pop[i]);
 	A.obj_eval();
-	B.obj_eval();
+	//B.obj_eval();
 //
 	if( A.cost < child_pop[i].cost  ) child_pop[i] = A;
-	if( B.cost < child_pop[i+1].cost && distance(A.path, B.path) > 0 ) child_pop[i+1] = B;
+	//if( B.cost < child_pop[i+1].cost && distance(A.path, B.path) > 0 ) child_pop[i+1] = B;
 //	ERX_Symetric(population[indexa], population[indexb], child_pop[i], child_pop[i+1]);
 //	AEX(population[indexa], population[indexb], child_pop[i], child_pop[i+1]);
 //	HGrex(population[indexa], population[indexb], child_pop[i]);
 
      }
 cout << std::setprecision(9)<< child_pop[i].cost<<endl;
-cout << std::setprecision(9)<< child_pop[i+1].cost<<endl;
+//cout << std::setprecision(9)<< child_pop[i+1].cost<<endl;
     }
 }
 void GENETIC::binary_tournament_selection(vector<CIndividual > &population, vector<CIndividual> &child_pop)
@@ -337,8 +332,14 @@ void GENETIC::exec_emo(int run)
 
 	sprintf(filename1,"%s/POS/kaggle_path_RUN%d_seed_%d.dat_bounded",currentPATH,run, seed);
 	sprintf(filename2,"%s/POF/kaggle_costs_RUN%d_seed_%d.dat_bounded",currentPATH,run, seed);
-
-	while(nfes < max_nfes )
+//	clock_t begin = clock();	
+	double begin = omp_get_wtime();	
+//        clock_t end = clock();
+	double end= omp_get_wtime();	
+  	//double elapsedTime= double(end - begin) / CLOCKS_PER_SEC;
+  	double elapsedTime= double(end - begin);
+	//while(nfes < max_nfes )
+	while(limitTime > elapsedTime)
 	{
 		evol_population();
 		nfes += pops;
@@ -348,6 +349,11 @@ void GENETIC::exec_emo(int run)
               save_front(filename2); //save the objective space information
 		cout << "best... " << std::setprecision(9)<< population[0].cost<<endl;
 	    }
+        //   end = clock();
+		
+	     end= omp_get_wtime();	
+  	   //elapsedTime= double(end - begin) / CLOCKS_PER_SEC;
+  	   elapsedTime= double(end - begin);
 	}
 	save_pos(filename1); //save the decision variable space information
         save_front(filename2); //save the objective space information

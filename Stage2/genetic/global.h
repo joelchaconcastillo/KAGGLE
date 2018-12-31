@@ -31,6 +31,7 @@ long long sieve_size;
 //city cities[MAX];
 city *cities;
 vector<int> primeIds;
+vector< vector < int > > NearestCities;
 
 //------------- Parameters in test instance ------------------
 int pops = 100; //population size
@@ -38,6 +39,7 @@ int nvar  = NCITIES;
 char    currentPATH[500];//filname path
 
 long int  max_nfes = 10000; //The function evaluation criteria is prefered than generations..
+double limitTime= 60; //default 60 seconds..
 //------------- Parameters in random number ------------------
 int     seed    = 177; //Default seed...
 long    rnd_uni_init;        

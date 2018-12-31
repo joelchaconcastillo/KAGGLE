@@ -3,87 +3,31 @@
 
 //#include "global.h"
 //#include "individual.h"
-void ls2optprimes(CIndividual &C){
 
-    vector<int> indexnPath = C.inversePath; 
-    vector<int> nPath = C.path;
-       vector<int> primespermtation = primeIds;
-	int repetitions = 50;
-    int cont = repetitions;
-	vector<int> permutation;
-     for(int i = 0; i < NCITIES; i++)  permutation.push_back(i);
-    while(cont--)
-    {
-	//random_shuffle(primespermtation.begin(), primespermtation.end());
-	random_shuffle(permutation.begin(), permutation.end());
-	int check = 100;//NCITIES;	
-       //for(int ii = 0; ii < checkprimes;ii++)
-       for(int ii = 0; ii < check;ii++)
-       {
-//           if( !(ii%100)) printf("%d %d\n", ii, primeIds[ii]);
-           //int i = indexnPath[primespermtation[ii]];
-           int i = indexnPath[permutation[ii]];
-
-           if( i == 0 || i == NCITIES-1) continue;
-           int K = 10;
-           int nearestn[K+1];
-            Kneares(K, nPath[i], nearestn);
-
-           for(int jj = 0; jj < K; jj++)
-           {
-//              cout <<jj <<endl;
-                int j = indexnPath[nearestn[jj]]%NCITIES;
-	      if( j <=i)continue;
- //          if( !(j%10000)) printf("%d\n", j);
-
-                if( max(i,j) - min(i,j) > 5000) continue;
-//                if(distdtsp(i,nPath[i],nPath[j]) > 2.0*distdtsp(i, nPath[i], nPath[nearestn[0]]))continue;
-
-              double olddistance = evaluate(nPath, i, j);
-              reversePath(nPath, indexnPath, i, j);
-
-//              reverse(nPath+i, nPath+j);
-              double newdistance = evaluate(nPath, i, j);
-//              printf("%lf %lf %d %d %d %d\n", olddistance, newdistance,i,j, nPath[i], nPath[j]);
-              if( newdistance >= olddistance)
-              {
-              //   reverse(nPath+i, nPath+j);
-                   reversePath(nPath, indexnPath, i, j);
-              }
-		else{
-			check +=100;
-			 printf("%lf\n", evaluate(nPath));
-		         cont = repetitions;
-		    }
-           }
-         }
-    }
-}
 void fast2opt(CIndividual &C){
 
-    bool flag = true;
 	vector<int> permutation;
      for(int i = 0; i < NCITIES; i++)  permutation.push_back(i);
-    int improvements = 0;
-//    while(flag)
-//    for(int h = 0; h < 2; h++)
+   bool improvement = true;
+//    while(improvement)
+    for(int h = 0; h < 2; h++)
     {
-	flag = false;
+	improvement = false;
        for(int ii = 0; ii < permutation.size();ii++)
        {
            int i = C.inversePath[permutation[ii]];
-//		if(!(ii%10000)) cout << ii<<endl;
+	//   if( !(i%3000)) cout << i << endl;
            if( i == 0 || i == NCITIES-1) continue;
-           int K = 50;
-           int nearestn[K+1];
-            Kneares(K, C.path[i], nearestn);
+           int K =50; //just take five cities..
+	    vector<int> Nearestlist = NearestCities[i];
+//	   random_shuffle(Nearestlist.begin()+5, Nearestlist.end());
 	   //2opt based in the nearest cities
            for(int jj = 0; jj < K; jj++)
            {
-                int j = C.inversePath[nearestn[jj]]%NCITIES;
+                int j = C.inversePath[Nearestlist[jj]]%NCITIES;
 	      if( j <=i)continue;
 
-                if( max(i,j) - min(i,j) > 5000) continue;
+                if( max(i,j) - min(i,j) > 5000) continue; //this is not convienent at all.. !!
 
               double olddistance = evaluate( C.path, i, j);
               reversePath( C.path,  C.inversePath, i, j);
@@ -93,10 +37,9 @@ void fast2opt(CIndividual &C){
                    reversePath( C.path,  C.inversePath, i, j);
               }
 		else 	
-		   {
-		    flag = true;
-		    improvements++;
-		    }
+	      {
+		   improvement=true;
+	      }
            }
 
          }
@@ -148,8 +91,7 @@ void fast2opt(CIndividual &C){
 //		   }
 //           }
 //	}
-	improvements = 0;
-	random_shuffle(permutation.begin(), permutation.end());
+//	random_shuffle(permutation.begin(), permutation.end());
     }
    C.obj_eval();
 }

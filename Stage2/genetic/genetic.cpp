@@ -5,7 +5,6 @@
 // ===========================================================================*/
 
 #include "algorithm.h"
-#include <omp.h>
 void PrintHelp()
 {
 	cout << "Instructions:"<<endl;
@@ -14,8 +13,8 @@ void PrintHelp()
 	cout << "--Pm (1/n), is the Mutation Probability " << endl;
 	cout << "--Path ./RESULT, is the directory where will save results, inside should be POF (fronts) and POS (decision variable fronts) directories"<<endl;
 	cout << "--n 100, is the number of individual by generation"<<endl;
-	cout << "--nfes, 25000, is the number of function evaluations"<<endl;
-	cout << "--Dist_factor 0.75 , initial valor of diversity D"<<endl;
+	cout << "--time, 25000, is the number of function evaluations"<<endl;
+	cout << "--Di 0.75 , initial valor of diversity D"<<endl;
 	cout << "example: \"./Ejecutable --n 100 --nfes 2500000 --Path . --Dist_factor 0.1 \""<<endl;
 }
 void SetConfiguration(int argc, char*argv[])
@@ -33,9 +32,9 @@ void SetConfiguration(int argc, char*argv[])
 			strcpy(currentPATH, argv[++i]);
 		else if(Terminal =="--n")
 			pops= atoi(argv[++i]);
-		else if(Terminal == "--nfes")
-			max_nfes = atoi(argv[++i]);
-		else if(Terminal == "--Dist_factor")
+		else if(Terminal == "--time")
+			limitTime= atof(argv[++i]);
+		else if(Terminal == "--Di")
 			Initial_lowest_distance_factor= atof(argv[++i])*nvar;
 		else if(Terminal == "--help" || Terminal == "--h")
 			PrintHelp();

@@ -1,19 +1,39 @@
 #ifndef __COMMON_H_
 #define __COMMON_H_
 #include "global.h"
+void Kneares(int k, int index, vector<int> &nindex)
+{
+        char filecity[500];
+        sprintf(filecity,"/tmp/NNearest_files/%d.txt",index);
+        FILE * file = fopen(filecity, "r");
+        double distance;
+        int indexc;
+        int cont = 0;
+        while(cont < k) 
+        {
+           fscanf(file, "%lf %d\n", &distance, &indexc);
+	   nindex.push_back(indexc);
+           cont++;
+        }
 
+        fclose(file);
+}
 void readInstance(char *filename_instance){
     FILE *file = fopen(filename_instance, "r");
     int N = NCITIES;//n = 197769;
     double x, y;
     int id;
     char trash[100];
+    NearestCities.resize(NCITIES);
+    printf("loading nearest cities...\n");
     fscanf(file, " %s\n", trash);
+
     while(N--){
         fscanf(file, "%d,%lf,%lf\n", &id, &x, &y);
         cities[id].id = id;
         cities[id].x = x;
         cities[id].y = y;
+	Kneares(50, id,NearestCities[id]); //pre-compute nearest points..
         if( isPrime[id])
         {
                 primeIds.push_back(id);
@@ -106,24 +126,7 @@ double distdtsp(int pos, int c1, int c2){
     return (sqrt((cities[c1].x - cities[c2].x)*(cities[c1].x - cities[c2].x) + (cities[c1].y - cities[c2].y)*(cities[c1].y - cities[c2].y)));
 }
 
-void Kneares(int k, int index, int *nindex)
-{
-        char filecity[500];
-        sprintf(filecity,"/tmp/NNearest_files/%d.txt",index);
-        FILE * file = fopen(filecity, "r");
-        double distance;
-        int indexc;
-        int cont = 0;
-        while(cont < k) 
-        {
-           fscanf(file, "%lf %d\n", &distance, &indexc);
-           nindex[cont] = indexc;
-           cont++;
-        }
 
-        fclose(file);
-
-}
 
 
 #endif
