@@ -10,12 +10,12 @@ void fast2opt(CIndividual &C){
      for(int i = 0; i < NCITIES; i++)  permutation.push_back(i);
    bool improvement = true;
 //    while(improvement)
-    for(int h = 0; h < 2; h++)
+    for(int h = 0; h < 10; h++)
     {
 	improvement = false;
        for(int ii = 0; ii < permutation.size();ii++)
        {
-           int i = C.inversePath[permutation[ii]];
+           int i = permutation[ii];
 	//   if( !(i%3000)) cout << i << endl;
            if( i == 0 || i == NCITIES-1) continue;
            int K =50; //just take five cities..
