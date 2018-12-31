@@ -9,25 +9,26 @@ void fast2opt(CIndividual &C){
 	vector<int> permutation;
      for(int i = 0; i < NCITIES; i++)  permutation.push_back(i);
    bool improvement = true;
-//    while(improvement)
-    for(int h = 0; h < 10; h++)
+int it = 0;
+    while(improvement && it < 20)
+//    for(int h = 0; h < 2; h++)
     {
+//	cout << "iteration "<<it++<<endl;
 	improvement = false;
        for(int ii = 0; ii < permutation.size();ii++)
        {
            int i = permutation[ii];
-	//   if( !(i%3000)) cout << i << endl;
            if( i == 0 || i == NCITIES-1) continue;
-           int K =50; //just take five cities..
-	    vector<int> Nearestlist = NearestCities[i];
-//	   random_shuffle(Nearestlist.begin()+5, Nearestlist.end());
+           int K =5; //just take five cities..
+	    vector<int> Nearestlist = NearestCities[C.path[i]];
+	   random_shuffle(Nearestlist.begin(), Nearestlist.end());
 	   //2opt based in the nearest cities
            for(int jj = 0; jj < K; jj++)
            {
                 int j = C.inversePath[Nearestlist[jj]]%NCITIES;
 	      if( j <=i)continue;
 
-                if( max(i,j) - min(i,j) > 5000) continue; //this is not convienent at all.. !!
+                if( max(i,j) - min(i,j) > 5000) continue; //this is not convenient at all.. !!
 
               double olddistance = evaluate( C.path, i, j);
               reversePath( C.path,  C.inversePath, i, j);
